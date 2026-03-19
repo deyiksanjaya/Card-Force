@@ -60,7 +60,6 @@
             height: 65vh; 
             max-width: 85vw;
             object-fit: contain;
-            /* Efek pudar dihapus, sekarang hilang langsung seketika */
             transition: transform 0.3s ease;
             transform: translateZ(0); 
             will-change: transform, opacity;
@@ -80,6 +79,9 @@
     </style>
 </head>
 <body class="text-gray-200 font-sans overflow-hidden h-screen w-screen m-0 relative">
+
+    <!-- Tombol Reset Rahasia di Pojok Kanan Atas -->
+    <div id="secret-reset-btn" class="absolute top-0 right-0 w-20 h-20 z-50"></div>
 
     <!-- ===================================== -->
     <!-- SCREEN 1: SETUP SCREEN (FAKE FACADE)  -->
@@ -252,6 +254,7 @@
         
         const cardImg = document.getElementById('main-card');
         const versionText = document.getElementById('app-version');
+        const secretResetBtn = document.getElementById('secret-reset-btn');
 
         const valueCodes = {
             'ACE': '01', '2': '02', '3': '03', '4': '04', '5': '05',
@@ -396,6 +399,9 @@
             resetTrickState();
         }
 
+        // ==========================================
+        // RESET TRICK STATE (TAP POJOK KANAN ATAS)
+        // ==========================================
         function resetTrickState() {
             if (shuffleInterval) clearInterval(shuffleInterval);
             isShuffling = false;
@@ -409,7 +415,11 @@
             cardImg.src = 'https://deckofcardsapi.com/static/img/back.png';
 
             prepareNextCard();
+            if (navigator.vibrate) navigator.vibrate(50);
         }
+
+        // Binding tombol reset rahasia
+        secretResetBtn.addEventListener('click', resetTrickState);
 
         // ==========================================
         // GESTURE SWIPE LOGIC
@@ -417,11 +427,17 @@
         let touchStartY = 0; let touchEndY = 0; let wasSwiped = false;
 
         cardImg.addEventListener('touchstart', (e) => { 
+            // Kalau kartu udah hilang, abaikan semua interaksi
+            if (isVanished) return;
+
             touchStartY = e.touches[0].clientY; 
             wasSwiped = false; 
         }, { passive: false });
 
         cardImg.addEventListener('touchend', (e) => { 
+            // Kalau kartu udah hilang, abaikan semua interaksi
+            if (isVanished) return;
+
             touchEndY = e.changedTouches[0].clientY; 
             handleGesture(); 
         });
@@ -437,7 +453,7 @@
                 if (endingMode === 'DISAPPEAR' && isRevealed && !isVanished && activeMode === 'STEBBINS') {
                     vanishCard();
                 } else {
-                    // Swipe pertama (dari awal/habis main acak) -> Langsung trigger Stebbins + Start
+                    // Swipe pertama -> Langsung trigger Stebbins + Start
                     toggleStebbinsAndStart(); 
                 }
             } else if (swipeDistance > 20) { 
@@ -446,7 +462,6 @@
         }
 
         function vanishCard() {
-            // Hilang seketika (tanpa delay opacity)
             cardImg.style.opacity = '0';
             isVanished = true;
             isRevealed = false; 
@@ -470,6 +485,9 @@
         // MAIN ANIMATION LOGIC (TAP TO START/STOP)
         // ==========================================
         cardImg.addEventListener('click', (e) => {
+            // Kalau kartu udah hilang, abaikan klik sama sekali
+            if (isVanished) return;
+            
             if (wasSwiped) return; 
             if (!isReady || deck.length === 0) return; 
 
@@ -488,9 +506,7 @@
             }
 
             // Normal Tap
-            if (isVanished) {
-                startShuffle();
-            } else if (!isShuffling) {
+            if (!isShuffling) {
                 startShuffle();
             } else {
                 stopShuffle();
@@ -500,7 +516,6 @@
         function startShuffle() {
             isShuffling = true;
             isRevealed = false;
-            isVanished = false;
             
             cardImg.style.opacity = '1'; 
             cardImg.classList.add('shaking');
