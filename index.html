@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Casino Card Randomizer</title>
+    
+    <!-- PWA Icons for iOS and Browser -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/3d-fluency/94/cards.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/3d-fluency/94/cards.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cards">
+    <meta name="theme-color" content="#064e3b">
+    
+    <!-- Google Fonts for Premium Casino Look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        casino: {
+                            dark: '#020617',
+                            green: '#064e3b',
+                            gold: '#d4af37',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            touch-action: none; 
+            -webkit-touch-callout: none;
+            background: radial-gradient(circle at 50% 40%, #064e3b 0%, #020617 80%, #000000 100%);
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg) scale(1.02); }
+            25% { transform: translate(-1px, -2px) rotate(-1deg) scale(1.02); }
+            50% { transform: translate(-2px, 0px) rotate(1deg) scale(1.02); }
+            75% { transform: translate(2px, 2px) rotate(0deg) scale(1.02); }
+            100% { transform: translate(1px, -1px) rotate(-1deg) scale(1.02); }
+        }
+
+        @keyframes errorWiggle {
+            0% { transform: rotate(0deg) scale(1); filter: brightness(1); }
+            25% { transform: rotate(-3deg) scale(1.02); filter: brightness(1.1); }
+            50% { transform: rotate(3deg) scale(1.02); filter: brightness(1.1); }
+            75% { transform: rotate(-3deg) scale(1.02); filter: brightness(1.1); }
+            100% { transform: rotate(0deg) scale(1); filter: brightness(1); }
+        }
+
+        .shaking { animation: shake 0.1s infinite; }
+        .error-wiggle { animation: errorWiggle 0.3s ease-in-out; }
+
+        #main-card {
+            height: 65vh; 
+            max-width: 85vw;
+            object-fit: contain;
+            transition: opacity 0.6s ease, transform 0.3s ease;
+            
+            border-radius: 4.5%; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            transform: translateZ(0); 
+            will-change: transform;
+            
+            user-select: none;
+            -webkit-user-drag: none;
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        #main-card.ready:hover {
+            transform: scale(1.03) translateZ(0);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
+        }
+
+        #info-modal {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="text-gray-200 font-sans overflow-hidden h-screen w-screen m-0 relative">
+
+    <!-- ===================================== -->
+    <!-- SCREEN 1: SETUP SCREEN (FAKE FACADE)  -->
+    <!-- ===================================== -->
+    <div id="setup-screen" class="absolute inset-0 flex flex-col items-center justify-center z-40 transition-opacity duration-500 p-6 bg-transparent">
+        
+        <div class="mb-6 opacity-60">
+            <span class="text-casino-gold text-2xl tracking-[0.5em]">♠♥♣♦</span>
+        </div>
+
+        <h2 class="font-serif text-2xl md:text-3xl text-casino-gold/90 mb-10 text-center tracking-wide drop-shadow-md">
+            What game are we<br>playing today?
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-4 w-full max-w-sm mb-12">
+            <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Texas Hold'em</button>
+            <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Blackjack</button>
+            <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Bridge</button>
+            <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Rummy</button>
+            <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Spades</button>
+            <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Custom Rules</button>
+        </div>
+        
+        <button id="skip-btn" class="text-white/40 text-xs tracking-[0.2em] border-b border-white/20 pb-0.5 hover:text-white/80 transition-colors uppercase">
+            Skip Setup
+        </button>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- SCREEN 2: MAIN APP (THE SECRET FORCE) -->
+    <!-- ===================================== -->
+    <div id="main-screen" class="absolute inset-0 flex flex-col items-center justify-between py-10 opacity-0 pointer-events-none transition-opacity duration-700 z-10">
+        
+        <h1 id="main-title" class="font-serif text-xl md:text-2xl text-casino-gold/80 text-center tracking-widest uppercase drop-shadow-lg opacity-80 mt-4 leading-relaxed">
+            Custom Game<br>
+            <span class="font-sans text-[10px] tracking-[0.4em] opacity-60">CARD SELECTOR</span>
+        </h1>
+
+        <div class="flex-1 flex items-center justify-center w-full">
+            <img 
+                id="main-card" 
+                src="https://deckofcardsapi.com/static/img/back.png" 
+                alt="Playing Card" 
+                class="opacity-30 animate-pulse cursor-wait"
+            >
+        </div>
+
+        <button id="open-modal-btn" class="font-sans text-[10px] tracking-[0.2em] text-white/40 border border-white/10 rounded-full px-6 py-2 uppercase hover:bg-white/10 hover:text-white/90 transition-all duration-300 mb-4 z-20 relative">
+            Rules & Info
+        </button>
+
+        <!-- Teks Rahasia Versi App (Peek) -->
+        <div id="app-version" class="absolute bottom-3 right-4 font-mono font-bold text-[10px] text-white/40 tracking-widest pointer-events-none select-none drop-shadow-md">
+            v2.4.000
+        </div>
+        
+    </div>
+
+    <!-- ===================================== -->
+    <!-- MODAL POP-UP (COVER STORY)            -->
+    <!-- ===================================== -->
+    <div id="info-modal" class="fixed inset-0 bg-black/80 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-gradient-to-b from-gray-900 to-black border border-casino-gold/30 p-8 rounded-xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 relative" id="modal-content">
+            
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-casino-dark px-4 border border-casino-gold/30 rounded-full">
+                <span class="text-casino-gold text-lg">♠♥♣♦</span>
+            </div>
+
+            <h2 id="modal-title" class="font-serif text-xl text-casino-gold mb-4 text-center tracking-wide uppercase mt-2">
+                Fair Play Rules
+            </h2>
+            
+            <div class="font-sans text-gray-300 text-sm space-y-4 leading-relaxed font-light">
+                <p class="text-center text-gray-400">Use this tool to fairly and randomly determine a starting card or trump suit for your game of <b id="modal-game-name" class="text-casino-gold font-medium">Custom Rules</b>.</p>
+                
+                <ul class="space-y-2 pl-2 border-l border-casino-gold/20 ml-2">
+                    <li class="pl-3"><span class="text-casino-gold mr-1">1.</span> Tap the card to begin shuffling.</li>
+                    <li class="pl-3"><span class="text-casino-gold mr-1">2.</span> Tap again at any time to instantly stop.</li>
+                    <li class="pl-3"><span class="text-casino-gold mr-1">3.</span> The revealed card dictates the round rules.</li>
+                </ul>
+                
+                <p class="text-[10px] text-gray-500 italic mt-6 text-center uppercase tracking-widest">
+                    The application's decision is final
+                </p>
+            </div>
+            
+            <button id="close-modal-btn" class="mt-8 w-full bg-transparent border border-casino-gold/50 text-casino-gold hover:bg-casino-gold hover:text-black font-medium tracking-widest text-sm py-3 rounded transition-colors uppercase">
+                Accept
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // DYNAMIC MANIFEST INJECTION FOR PWA
+        // ==========================================
+        const iconUrl = "https://img.icons8.com/3d-fluency/94/cards.png";
+        const manifest = {
+            name: "Cards Randomizer",
+            short_name: "Cards",
+            start_url: location.href,
+            display: "standalone",
+            background_color: "#020617",
+            theme_color: "#064e3b",
+            icons: [
+                { src: iconUrl, sizes: "192x192", type: "image/png" },
+                { src: iconUrl, sizes: "512x512", type: "image/png" }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${URL.createObjectURL(manifestBlob)}">`);
+
+        // ==========================================
+        // UI TRANSITION LOGIC
+        // ==========================================
+        const setupScreen = document.getElementById('setup-screen');
+        const mainScreen = document.getElementById('main-screen');
+        const gameBtns = document.querySelectorAll('.game-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        
+        const mainTitle = document.getElementById('main-title');
+        const modalTitle = document.getElementById('modal-title');
+        const modalGameName = document.getElementById('modal-game-name');
+
+        function startApp(gameName) {
+            let displayGame = gameName ? gameName : "Custom Rules";
+            mainTitle.innerHTML = `${displayGame}<br><span class="font-sans text-[10px] tracking-[0.4em] opacity-60">CARD SELECTOR</span>`;
+            modalTitle.innerText = `${displayGame} Rules`;
+            modalGameName.innerText = displayGame;
+
+            setupScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                setupScreen.classList.add('hidden'); 
+                mainScreen.classList.remove('opacity-0', 'pointer-events-none');
+            }, 500);
+        }
+
+        gameBtns.forEach(btn => btn.addEventListener('click', (e) => startApp(e.target.innerText)));
+        skipBtn.addEventListener('click', () => startApp(''));
+
+        // ==========================================
+        // API & STATE INITIALIZATION
+        // ==========================================
+        const API_URL = 'https://deckofcardsapi.com/api/deck/new/draw/?count=52';
+        let deck = [];
+        let isReady = false;
+        let isShuffling = false; 
+        let shuffleInterval;
+        let currentCardData = null; 
+        let upcomingCardData = null; 
+        let activeMode = 'NONE'; 
+        
+        const cardImg = document.getElementById('main-card');
+        const versionText = document.getElementById('app-version');
+
+        // Mapping Kamus Buat Kode Rahasia Peek
+        const valueCodes = {
+            'ACE': '01', '2': '02', '3': '03', '4': '04', '5': '05',
+            '6': '06', '7': '07', '8': '08', '9': '09', '10': '10',
+            'JACK': '11', 'QUEEN': '12', 'KING': '13'
+        };
+        const suitCodes = {
+            'SPADES': '1', 'HEARTS': '2', 'CLUBS': '3', 'DIAMONDS': '4'
+        };
+
+        // ==========================================
+        // STEBBINS STACK GENERATOR
+        // ==========================================
+        const stebbinsStack = [];
+        const stebbinsValues = ['ACE', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'JACK', 'QUEEN', 'KING'];
+        const stebbinsSuits = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
+        
+        let valIdx = 0; let suitIdx = 0; 
+        for(let i = 0; i < 52; i++) {
+            stebbinsStack.push({ v: stebbinsValues[valIdx], s: stebbinsSuits[suitIdx] });
+            valIdx = (valIdx + 3) % 13; suitIdx = (suitIdx + 1) % 4; 
+        }
+
+        const preloadImages = (urls) => Promise.all(urls.map(url => new Promise((resolve) => {
+            const img = new Image(); img.src = url; img.onload = resolve; img.onerror = resolve; 
+        })));
+
+        async function init() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                deck = data.cards;
+
+                await preloadImages(deck.map(card => card.image));
+
+                isReady = true;
+                cardImg.classList.remove('opacity-30', 'animate-pulse', 'cursor-wait');
+                cardImg.classList.add('ready', 'opacity-100', 'cursor-pointer');
+                
+                prepareNextCard();
+            } catch (error) {
+                console.error("Failed to load cards:", error);
+            }
+        }
+
+        function getCardIndexInStack(stack, card) {
+            return stack.findIndex(c => c.v === card.value && c.s === card.suit);
+        }
+
+        // FUNGSI INI YG NENTUIN TARGET SEBELUM DIKLIK
+        function prepareNextCard() {
+            if (!isReady || deck.length === 0) return;
+
+            if (activeMode === 'STEBBINS' && currentCardData) {
+                const idx = getCardIndexInStack(stebbinsStack, currentCardData);
+                if (idx !== -1) {
+                    const nextIdx = (idx + 1) % 52;
+                    const target = stebbinsStack[nextIdx];
+                    upcomingCardData = deck.find(c => c.value === target.v && c.suit === target.s);
+                } else {
+                    upcomingCardData = deck[Math.floor(Math.random() * deck.length)];
+                }
+            } else {
+                upcomingCardData = deck[Math.floor(Math.random() * deck.length)];
+            }
+            
+            updateVersionPeek(upcomingCardData);
+        }
+
+        function updateVersionPeek(targetCard) {
+            if (!targetCard) {
+                versionText.innerText = 'v2.4.000';
+                return;
+            }
+            const valStr = valueCodes[targetCard.value];
+            const suitStr = suitCodes[targetCard.suit];
+            versionText.innerText = `v2.4.${valStr}${suitStr}`;
+        }
+
+        // ==========================================
+        // MODAL (POP-UP) LOGIC
+        // ==========================================
+        const modal = document.getElementById('info-modal');
+        const modalContent = document.getElementById('modal-content');
+        const openBtn = document.getElementById('open-modal-btn');
+        const closeBtn = document.getElementById('close-modal-btn');
+
+        function openModal() {
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); modalContent.classList.add('scale-100'); }, 10);
+        }
+        function closeModal() {
+            modal.classList.add('opacity-0'); modalContent.classList.remove('scale-100'); modalContent.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        }
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        // ==========================================
+        // GESTURE SWIPE LOGIC (SECRET STEBBINS)
+        // ==========================================
+        let touchStartY = 0; let touchEndY = 0; let wasSwiped = false;
+
+        cardImg.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; wasSwiped = false; }, { passive: false });
+        cardImg.addEventListener('touchend', (e) => { touchEndY = e.changedTouches[0].clientY; handleGesture(); });
+
+        function handleGesture() {
+            const swipeDistance = touchStartY - touchEndY;
+            if (swipeDistance > 50) { wasSwiped = true; toggleStebbins(); } 
+            else if (Math.abs(swipeDistance) > 20) { wasSwiped = true; }
+        }
+
+        function toggleStebbins() {
+            if (isShuffling || !isReady) return;
+
+            if (!currentCardData) {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                cardImg.classList.add('error-wiggle');
+                setTimeout(() => cardImg.classList.remove('error-wiggle'), 300);
+                return;
+            }
+
+            if (activeMode === 'STEBBINS') {
+                activeMode = 'NONE';
+                if (navigator.vibrate) navigator.vibrate([30, 50, 30]); 
+            } else {
+                activeMode = 'STEBBINS';
+                if (navigator.vibrate) navigator.vibrate([30, 30, 30]); 
+            }
+            
+            prepareNextCard();
+        }
+
+        // ==========================================
+        // MAIN ANIMATION LOGIC (INSTANT STOP)
+        // ==========================================
+        cardImg.addEventListener('click', (e) => {
+            if (wasSwiped) return; 
+            if (!isReady || deck.length === 0) return; 
+
+            if (!isShuffling) {
+                isShuffling = true;
+                cardImg.classList.add('shaking');
+                const speedMs = 60; 
+
+                shuffleInterval = setInterval(() => {
+                    const randomCard = deck[Math.floor(Math.random() * deck.length)];
+                    cardImg.src = randomCard.image;
+                }, speedMs);
+                
+            } else {
+                clearInterval(shuffleInterval);
+                finishShuffle();
+            }
+        });
+
+        function finishShuffle() {
+            cardImg.src = upcomingCardData.image;
+            cardImg.classList.remove('shaking');
+            
+            currentCardData = upcomingCardData;
+            isShuffling = false;
+
+            prepareNextCard();
+        }
+
+        window.onload = init;
+
+    </script>
+</body>
+</html>
