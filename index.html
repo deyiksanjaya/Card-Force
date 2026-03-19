@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -54,24 +54,16 @@
             100% { transform: translate(1px, -1px) rotate(-1deg) scale(1.02); }
         }
 
-        @keyframes errorWiggle {
-            0% { transform: rotate(0deg) scale(1); filter: brightness(1); }
-            25% { transform: rotate(-3deg) scale(1.02); filter: brightness(1.1); }
-            50% { transform: rotate(3deg) scale(1.02); filter: brightness(1.1); }
-            75% { transform: rotate(-3deg) scale(1.02); filter: brightness(1.1); }
-            100% { transform: rotate(0deg) scale(1); filter: brightness(1); }
-        }
-
         .shaking { animation: shake 0.1s infinite; }
-        .error-wiggle { animation: errorWiggle 0.3s ease-in-out; }
 
         #main-card {
             height: 65vh; 
             max-width: 85vw;
             object-fit: contain;
-            transition: opacity 0.6s ease, transform 0.3s ease;
+            /* Efek pudar dihapus, sekarang hilang langsung seketika */
+            transition: transform 0.3s ease;
             transform: translateZ(0); 
-            will-change: transform;
+            will-change: transform, opacity;
             user-select: none;
             -webkit-user-drag: none;
             -webkit-tap-highlight-color: transparent; 
@@ -81,7 +73,7 @@
             transform: scale(1.03) translateZ(0);
         }
 
-        #info-modal {
+        .glass-panel {
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
@@ -122,7 +114,7 @@
             <span class="font-sans text-[10px] tracking-[0.4em] opacity-60">CARD SELECTOR</span>
         </h1>
 
-        <div class="flex-1 flex items-center justify-center w-full">
+        <div class="flex-1 flex items-center justify-center w-full relative">
             <img 
                 id="main-card" 
                 src="https://deckofcardsapi.com/static/img/back.png" 
@@ -131,21 +123,20 @@
             >
         </div>
 
-        <!-- Tombol Rules balik pakai border kapsul -->
         <button id="open-modal-btn" class="font-sans text-[10px] tracking-[0.2em] text-white/40 border border-white/10 rounded-full px-6 py-2 uppercase hover:bg-white/10 hover:text-white/90 transition-all duration-300 mb-8 z-20 relative">
             Rules & Info
         </button>
 
-        <!-- Teks Rahasia Versi App (Peek) ditaruh di tengah bawah -->
+        <!-- Teks Rahasia Versi App (Peek) -->
         <div id="app-version" class="absolute bottom-3 left-1/2 -translate-x-1/2 font-mono font-bold text-[10px] text-white/40 tracking-widest pointer-events-none select-none">
             v2.4.000
         </div>
     </div>
 
     <!-- ===================================== -->
-    <!-- MODAL POP-UP (COVER STORY)            -->
+    <!-- MODAL POP-UP 1: COVER STORY           -->
     <!-- ===================================== -->
-    <div id="info-modal" class="fixed inset-0 bg-black/80 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4">
+    <div id="info-modal" class="fixed inset-0 bg-black/80 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4 glass-panel">
         <div class="bg-gradient-to-b from-gray-900 to-black border border-casino-gold/30 p-8 rounded-xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 relative" id="modal-content">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-casino-dark px-4 border border-casino-gold/30 rounded-full">
                 <span class="text-casino-gold text-lg">♠♥♣♦</span>
@@ -156,7 +147,7 @@
             <div class="font-sans text-gray-300 text-sm space-y-4 leading-relaxed font-light">
                 <p class="text-center text-gray-400">Use this tool to fairly and randomly determine a starting card or trump suit for your game of <b id="modal-game-name" class="text-casino-gold font-medium">Custom Rules</b>.</p>
                 <ul class="space-y-2 pl-2 border-l border-casino-gold/20 ml-2">
-                    <li class="pl-3"><span class="text-casino-gold mr-1">1.</span> Tap the card to begin shuffling.</li>
+                    <li class="pl-3"><span class="text-casino-gold mr-1">1.</span> Swipe or tap the card to begin shuffling.</li>
                     <li class="pl-3"><span class="text-casino-gold mr-1">2.</span> Tap again at any time to instantly stop.</li>
                     <li class="pl-3"><span class="text-casino-gold mr-1">3.</span> The revealed card dictates the round rules.</li>
                 </ul>
@@ -166,6 +157,28 @@
             </div>
             <button id="close-modal-btn" class="mt-8 w-full bg-transparent border border-casino-gold/50 text-casino-gold hover:bg-casino-gold hover:text-black font-medium tracking-widest text-sm py-3 rounded transition-colors uppercase">
                 Accept
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- MODAL POP-UP 2: SECRET SETTINGS       -->
+    <!-- ===================================== -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-6">
+        <div class="w-full max-w-xs text-center" id="settings-content">
+            <h3 class="font-mono text-white/50 text-xs tracking-[0.3em] uppercase mb-8 border-b border-white/10 pb-2">System Config</h3>
+            
+            <div class="space-y-4">
+                <button onclick="setEndingMode('NORMAL')" id="btn-mode-normal" class="w-full py-4 border border-white/20 text-white text-sm tracking-widest uppercase transition-all duration-300 bg-white/10">
+                    Mode: Normal
+                </button>
+                <button onclick="setEndingMode('DISAPPEAR')" id="btn-mode-disappear" class="w-full py-4 border border-white/20 text-white/50 text-sm tracking-widest uppercase transition-all duration-300">
+                    Mode: Vanish
+                </button>
+            </div>
+
+            <button onclick="closeSettings()" class="mt-12 text-white/30 text-xs tracking-widest uppercase hover:text-white transition-colors">
+                [ Close ]
             </button>
         </div>
     </div>
@@ -224,11 +237,18 @@
         const API_URL = 'https://deckofcardsapi.com/api/deck/new/draw/?count=52';
         let deck = [];
         let isReady = false;
+        
+        // Status Interaksi
         let isShuffling = false; 
+        let isRevealed = false; 
+        let isVanished = false; 
+        
         let shuffleInterval;
         let currentCardData = null; 
         let upcomingCardData = null; 
+        
         let activeMode = 'NONE'; 
+        let endingMode = localStorage.getItem('casinoEndingMode') || 'NORMAL'; 
         
         const cardImg = document.getElementById('main-card');
         const versionText = document.getElementById('app-version');
@@ -258,6 +278,8 @@
 
         async function init() {
             try {
+                updateSettingsUI(endingMode);
+
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 deck = data.cards;
@@ -265,8 +287,9 @@
                 await preloadImages(deck.map(card => card.image));
 
                 isReady = true;
+                cardImg.style.opacity = '1';
                 cardImg.classList.remove('opacity-30', 'animate-pulse', 'cursor-wait');
-                cardImg.classList.add('ready', 'opacity-100', 'cursor-pointer');
+                cardImg.classList.add('ready', 'cursor-pointer');
                 
                 prepareNextCard();
             } catch (error) {
@@ -308,7 +331,7 @@
         }
 
         // ==========================================
-        // MODAL (POP-UP) LOGIC
+        // MODAL (POP-UP) LOGIC: COVER STORY
         // ==========================================
         const modal = document.getElementById('info-modal');
         const modalContent = document.getElementById('modal-content');
@@ -328,28 +351,109 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
         // ==========================================
+        // SECRET SETTINGS LOGIC (TRIPLE TAP)
+        // ==========================================
+        const settingsModal = document.getElementById('settings-modal');
+        let clickCount = 0;
+        let clickTimer = null;
+
+        function openSettings() {
+            settingsModal.classList.remove('hidden'); settingsModal.classList.add('flex');
+            setTimeout(() => { settingsModal.classList.remove('opacity-0'); }, 10);
+        }
+
+        function closeSettings() {
+            settingsModal.classList.add('opacity-0');
+            setTimeout(() => { settingsModal.classList.add('hidden'); settingsModal.classList.remove('flex'); }, 300);
+        }
+
+        function updateSettingsUI(mode) {
+            const btnNormal = document.getElementById('btn-mode-normal');
+            const btnDisappear = document.getElementById('btn-mode-disappear');
+            
+            if(mode === 'NORMAL') {
+                btnNormal.classList.replace('text-white/50', 'text-white');
+                btnNormal.classList.add('bg-white/10');
+                btnDisappear.classList.replace('text-white', 'text-white/50');
+                btnDisappear.classList.remove('bg-white/10');
+            } else {
+                btnDisappear.classList.replace('text-white/50', 'text-white');
+                btnDisappear.classList.add('bg-white/10');
+                btnNormal.classList.replace('text-white', 'text-white/50');
+                btnNormal.classList.remove('bg-white/10');
+            }
+        }
+
+        window.setEndingMode = function(mode) {
+            if (endingMode === mode) return;
+
+            endingMode = mode;
+            localStorage.setItem('casinoEndingMode', mode);
+            
+            updateSettingsUI(mode);
+            if (navigator.vibrate) navigator.vibrate(50);
+
+            resetTrickState();
+        }
+
+        function resetTrickState() {
+            if (shuffleInterval) clearInterval(shuffleInterval);
+            isShuffling = false;
+            isRevealed = false;
+            isVanished = false;
+            activeMode = 'NONE';
+            currentCardData = null;
+            
+            cardImg.classList.remove('shaking');
+            cardImg.style.opacity = '1';
+            cardImg.src = 'https://deckofcardsapi.com/static/img/back.png';
+
+            prepareNextCard();
+        }
+
+        // ==========================================
         // GESTURE SWIPE LOGIC
         // ==========================================
         let touchStartY = 0; let touchEndY = 0; let wasSwiped = false;
 
-        cardImg.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; wasSwiped = false; }, { passive: false });
-        cardImg.addEventListener('touchend', (e) => { touchEndY = e.changedTouches[0].clientY; handleGesture(); });
+        cardImg.addEventListener('touchstart', (e) => { 
+            touchStartY = e.touches[0].clientY; 
+            wasSwiped = false; 
+        }, { passive: false });
+
+        cardImg.addEventListener('touchend', (e) => { 
+            touchEndY = e.changedTouches[0].clientY; 
+            handleGesture(); 
+        });
 
         function handleGesture() {
-            const swipeDistance = touchStartY - touchEndY;
-            if (swipeDistance > 50) { wasSwiped = true; toggleStebbins(); } 
-            else if (Math.abs(swipeDistance) > 20) { wasSwiped = true; }
+            const swipeDistance = Math.abs(touchStartY - touchEndY); 
+            
+            if (swipeDistance > 50) { 
+                wasSwiped = true; 
+                if (isShuffling) return; 
+
+                // CEK MODE VANISH: Kartu HILANG hanya kalau swipe dilakukan setelah Stebbins aktif
+                if (endingMode === 'DISAPPEAR' && isRevealed && !isVanished && activeMode === 'STEBBINS') {
+                    vanishCard();
+                } else {
+                    // Swipe pertama (dari awal/habis main acak) -> Langsung trigger Stebbins + Start
+                    toggleStebbinsAndStart(); 
+                }
+            } else if (swipeDistance > 20) { 
+                wasSwiped = true; 
+            }
         }
 
-        function toggleStebbins() {
-            if (isShuffling || !isReady) return;
+        function vanishCard() {
+            // Hilang seketika (tanpa delay opacity)
+            cardImg.style.opacity = '0';
+            isVanished = true;
+            isRevealed = false; 
+        }
 
-            if (!currentCardData) {
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                cardImg.classList.add('error-wiggle');
-                setTimeout(() => cardImg.classList.remove('error-wiggle'), 300);
-                return;
-            }
+        function toggleStebbinsAndStart() {
+            if (!isReady || deck.length === 0) return;
 
             if (activeMode === 'STEBBINS') {
                 activeMode = 'NONE';
@@ -358,32 +462,60 @@
                 activeMode = 'STEBBINS';
                 if (navigator.vibrate) navigator.vibrate([30, 30, 30]); 
             }
-            
             prepareNextCard();
+            startShuffle();
         }
 
         // ==========================================
-        // MAIN ANIMATION LOGIC
+        // MAIN ANIMATION LOGIC (TAP TO START/STOP)
         // ==========================================
         cardImg.addEventListener('click', (e) => {
             if (wasSwiped) return; 
             if (!isReady || deck.length === 0) return; 
 
-            if (!isShuffling) {
-                isShuffling = true;
-                cardImg.classList.add('shaking');
-                const speedMs = 60; 
+            // Logic deteksi Triple Tap
+            clickCount++;
+            if (clickCount === 1) {
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                }, 600); 
+            } else if (clickCount === 3) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                openSettings();
+                if(isShuffling) stopShuffle(); 
+                return;
+            }
 
-                shuffleInterval = setInterval(() => {
-                    const randomCard = deck[Math.floor(Math.random() * deck.length)];
-                    cardImg.src = randomCard.image;
-                }, speedMs);
-                
+            // Normal Tap
+            if (isVanished) {
+                startShuffle();
+            } else if (!isShuffling) {
+                startShuffle();
             } else {
-                clearInterval(shuffleInterval);
-                finishShuffle();
+                stopShuffle();
             }
         });
+
+        function startShuffle() {
+            isShuffling = true;
+            isRevealed = false;
+            isVanished = false;
+            
+            cardImg.style.opacity = '1'; 
+            cardImg.classList.add('shaking');
+            
+            const speedMs = 60; 
+            shuffleInterval = setInterval(() => {
+                const randomCard = deck[Math.floor(Math.random() * deck.length)];
+                cardImg.src = randomCard.image;
+            }, speedMs);
+        }
+
+        function stopShuffle() {
+            clearInterval(shuffleInterval);
+            finishShuffle();
+        }
 
         function finishShuffle() {
             cardImg.src = upcomingCardData.image;
@@ -391,7 +523,8 @@
             
             currentCardData = upcomingCardData;
             isShuffling = false;
-
+            isRevealed = true; 
+            
             prepareNextCard();
         }
 
