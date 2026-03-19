@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Casino Card Randomizer</title>
     
-    <!-- PWA Icons for iOS and Browser -->
+    <!-- PWA Icons -->
     <link rel="icon" type="image/png" href="https://img.icons8.com/3d-fluency/94/cards.png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/3d-fluency/94/cards.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="Cards">
     <meta name="theme-color" content="#064e3b">
     
-    <!-- Google Fonts for Premium Casino Look -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -70,12 +70,8 @@
             max-width: 85vw;
             object-fit: contain;
             transition: opacity 0.6s ease, transform 0.3s ease;
-            
-            border-radius: 4.5%; 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
             transform: translateZ(0); 
             will-change: transform;
-            
             user-select: none;
             -webkit-user-drag: none;
             -webkit-tap-highlight-color: transparent; 
@@ -83,7 +79,6 @@
 
         #main-card.ready:hover {
             transform: scale(1.03) translateZ(0);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
         }
 
         #info-modal {
@@ -98,15 +93,12 @@
     <!-- SCREEN 1: SETUP SCREEN (FAKE FACADE)  -->
     <!-- ===================================== -->
     <div id="setup-screen" class="absolute inset-0 flex flex-col items-center justify-center z-40 transition-opacity duration-500 p-6 bg-transparent">
-        
         <div class="mb-6 opacity-60">
             <span class="text-casino-gold text-2xl tracking-[0.5em]">♠♥♣♦</span>
         </div>
-
         <h2 class="font-serif text-2xl md:text-3xl text-casino-gold/90 mb-10 text-center tracking-wide drop-shadow-md">
             What game are we<br>playing today?
         </h2>
-        
         <div class="grid grid-cols-2 gap-4 w-full max-w-sm mb-12">
             <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Texas Hold'em</button>
             <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Blackjack</button>
@@ -115,7 +107,6 @@
             <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Spades</button>
             <button class="game-btn border border-casino-gold/30 bg-black/40 backdrop-blur-sm text-gray-300 py-3 rounded hover:bg-casino-gold hover:text-black hover:border-casino-gold transition-all duration-300 tracking-widest text-xs uppercase font-medium">Custom Rules</button>
         </div>
-        
         <button id="skip-btn" class="text-white/40 text-xs tracking-[0.2em] border-b border-white/20 pb-0.5 hover:text-white/80 transition-colors uppercase">
             Skip Setup
         </button>
@@ -140,15 +131,15 @@
             >
         </div>
 
-        <button id="open-modal-btn" class="font-sans text-[10px] tracking-[0.2em] text-white/40 border border-white/10 rounded-full px-6 py-2 uppercase hover:bg-white/10 hover:text-white/90 transition-all duration-300 mb-4 z-20 relative">
+        <!-- Tombol Rules balik pakai border kapsul -->
+        <button id="open-modal-btn" class="font-sans text-[10px] tracking-[0.2em] text-white/40 border border-white/10 rounded-full px-6 py-2 uppercase hover:bg-white/10 hover:text-white/90 transition-all duration-300 mb-8 z-20 relative">
             Rules & Info
         </button>
 
-        <!-- Teks Rahasia Versi App (Peek) -->
-        <div id="app-version" class="absolute bottom-3 right-4 font-mono font-bold text-[10px] text-white/40 tracking-widest pointer-events-none select-none drop-shadow-md">
+        <!-- Teks Rahasia Versi App (Peek) ditaruh di tengah bawah -->
+        <div id="app-version" class="absolute bottom-3 left-1/2 -translate-x-1/2 font-mono font-bold text-[10px] text-white/40 tracking-widest pointer-events-none select-none">
             v2.4.000
         </div>
-        
     </div>
 
     <!-- ===================================== -->
@@ -156,29 +147,23 @@
     <!-- ===================================== -->
     <div id="info-modal" class="fixed inset-0 bg-black/80 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-gradient-to-b from-gray-900 to-black border border-casino-gold/30 p-8 rounded-xl w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 relative" id="modal-content">
-            
             <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-casino-dark px-4 border border-casino-gold/30 rounded-full">
                 <span class="text-casino-gold text-lg">♠♥♣♦</span>
             </div>
-
             <h2 id="modal-title" class="font-serif text-xl text-casino-gold mb-4 text-center tracking-wide uppercase mt-2">
                 Fair Play Rules
             </h2>
-            
             <div class="font-sans text-gray-300 text-sm space-y-4 leading-relaxed font-light">
                 <p class="text-center text-gray-400">Use this tool to fairly and randomly determine a starting card or trump suit for your game of <b id="modal-game-name" class="text-casino-gold font-medium">Custom Rules</b>.</p>
-                
                 <ul class="space-y-2 pl-2 border-l border-casino-gold/20 ml-2">
                     <li class="pl-3"><span class="text-casino-gold mr-1">1.</span> Tap the card to begin shuffling.</li>
                     <li class="pl-3"><span class="text-casino-gold mr-1">2.</span> Tap again at any time to instantly stop.</li>
                     <li class="pl-3"><span class="text-casino-gold mr-1">3.</span> The revealed card dictates the round rules.</li>
                 </ul>
-                
                 <p class="text-[10px] text-gray-500 italic mt-6 text-center uppercase tracking-widest">
                     The application's decision is final
                 </p>
             </div>
-            
             <button id="close-modal-btn" class="mt-8 w-full bg-transparent border border-casino-gold/50 text-casino-gold hover:bg-casino-gold hover:text-black font-medium tracking-widest text-sm py-3 rounded transition-colors uppercase">
                 Accept
             </button>
@@ -248,7 +233,6 @@
         const cardImg = document.getElementById('main-card');
         const versionText = document.getElementById('app-version');
 
-        // Mapping Kamus Buat Kode Rahasia Peek
         const valueCodes = {
             'ACE': '01', '2': '02', '3': '03', '4': '04', '5': '05',
             '6': '06', '7': '07', '8': '08', '9': '09', '10': '10',
@@ -258,9 +242,6 @@
             'SPADES': '1', 'HEARTS': '2', 'CLUBS': '3', 'DIAMONDS': '4'
         };
 
-        // ==========================================
-        // STEBBINS STACK GENERATOR
-        // ==========================================
         const stebbinsStack = [];
         const stebbinsValues = ['ACE', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'JACK', 'QUEEN', 'KING'];
         const stebbinsSuits = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
@@ -297,7 +278,6 @@
             return stack.findIndex(c => c.v === card.value && c.s === card.suit);
         }
 
-        // FUNGSI INI YG NENTUIN TARGET SEBELUM DIKLIK
         function prepareNextCard() {
             if (!isReady || deck.length === 0) return;
 
@@ -348,7 +328,7 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
         // ==========================================
-        // GESTURE SWIPE LOGIC (SECRET STEBBINS)
+        // GESTURE SWIPE LOGIC
         // ==========================================
         let touchStartY = 0; let touchEndY = 0; let wasSwiped = false;
 
@@ -383,7 +363,7 @@
         }
 
         // ==========================================
-        // MAIN ANIMATION LOGIC (INSTANT STOP)
+        // MAIN ANIMATION LOGIC
         // ==========================================
         cardImg.addEventListener('click', (e) => {
             if (wasSwiped) return; 
