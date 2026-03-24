@@ -76,6 +76,45 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
+        
+        /* Custom scrollbar untuk menu setting */
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.4); /* gold transparan */
+            border-radius: 4px;
+        }
+        
+        /* Stylized Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #d4af37; /* casino-gold */
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body class="text-gray-200 font-sans overflow-hidden h-screen w-screen m-0 relative">
@@ -166,21 +205,63 @@
     <!-- ===================================== -->
     <!-- MODAL POP-UP 2: SECRET SETTINGS       -->
     <!-- ===================================== -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-6">
-        <div class="w-full max-w-xs text-center" id="settings-content">
-            <h3 class="font-mono text-white/50 text-xs tracking-[0.3em] uppercase mb-8 border-b border-white/10 pb-2">System Config</h3>
+    <div id="settings-modal" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4 pt-10">
+        <!-- Container scrollable -->
+        <div class="w-full max-w-xs text-center custom-scroll max-h-[85vh] overflow-y-auto pr-3 pb-6" id="settings-content">
             
-            <div class="space-y-4">
-                <button onclick="setEndingMode('NORMAL')" id="btn-mode-normal" class="w-full py-4 border border-white/20 text-white text-sm tracking-widest uppercase transition-all duration-300 bg-white/10">
-                    Mode: Normal
+            <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1 mt-2">Force Mode</h3>
+            <div class="space-y-2 mb-6">
+                <button onclick="setForceMode('STEBBINS')" id="btn-force-stebbins" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Stebbins Stack
                 </button>
-                <button onclick="setEndingMode('DISAPPEAR')" id="btn-mode-disappear" class="w-full py-4 border border-white/20 text-white/50 text-sm tracking-widest uppercase transition-all duration-300">
-                    Mode: Vanish
+                <button onclick="setForceMode('ODD')" id="btn-force-odd" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Odd (1,3,5,7,9)
+                </button>
+                <button onclick="setForceMode('EVEN')" id="btn-force-even" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Even (2,4,6,8,10)
                 </button>
             </div>
 
-            <button onclick="closeSettings()" class="mt-12 text-white/30 text-xs tracking-widest uppercase hover:text-white transition-colors">
-                [ Close ]
+            <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1">Shuffle Display</h3>
+            <div class="space-y-2 mb-6">
+                <button onclick="setShuffleMode('NORMAL')" id="btn-shuffle-normal" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    All Cards
+                </button>
+                <button onclick="setShuffleMode('FORCED')" id="btn-shuffle-forced" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Force Only
+                </button>
+            </div>
+
+            <!-- Slider Kecepatan Animasi -->
+            <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1">Anim Speed</h3>
+            <div class="mb-6 px-1">
+                <input type="range" id="anim-speed-slider" min="20" max="150" value="110" class="w-full">
+                <div class="flex justify-between text-[8px] text-white/30 uppercase tracking-widest mt-2">
+                    <span>Slow</span>
+                    <span>Fast</span>
+                </div>
+            </div>
+
+            <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1">JQK Suit (Anim)</h3>
+            <div class="grid grid-cols-4 gap-2 mb-6">
+                <button onclick="setJqkSuit('SPADES')" id="btn-jqk-spades" class="py-1 border border-white/20 text-white/50 text-lg transition-all duration-300 rounded-sm">♠</button>
+                <button onclick="setJqkSuit('HEARTS')" id="btn-jqk-hearts" class="py-1 border border-white/20 text-white/50 text-lg transition-all duration-300 text-red-500 rounded-sm">♥</button>
+                <button onclick="setJqkSuit('CLUBS')" id="btn-jqk-clubs" class="py-1 border border-white/20 text-white/50 text-lg transition-all duration-300 rounded-sm">♣</button>
+                <button onclick="setJqkSuit('DIAMONDS')" id="btn-jqk-diamonds" class="py-1 border border-white/20 text-white/50 text-lg transition-all duration-300 text-red-500 rounded-sm">♦</button>
+            </div>
+
+            <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1">Ending Mode</h3>
+            <div class="space-y-2 mb-4">
+                <button onclick="setEndingMode('NORMAL')" id="btn-mode-normal" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Normal
+                </button>
+                <button onclick="setEndingMode('DISAPPEAR')" id="btn-mode-disappear" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Vanish
+                </button>
+            </div>
+
+            <button onclick="closeSettings()" class="mt-6 text-white/30 text-[10px] tracking-widest uppercase hover:text-white transition-colors border border-white/10 px-6 py-2 rounded-full">
+                Close Settings
             </button>
         </div>
     </div>
@@ -240,7 +321,6 @@
         let deck = [];
         let isReady = false;
         
-        // Status Interaksi
         let isShuffling = false; 
         let isRevealed = false; 
         let isVanished = false; 
@@ -248,13 +328,22 @@
         let shuffleInterval;
         let currentCardData = null; 
         let upcomingCardData = null; 
+        let lastAnimCardCode = null; 
         
-        let activeMode = 'NONE'; 
+        let isForceActive = false; 
+        
+        // Settings State from LocalStorage
+        let forceMode = localStorage.getItem('casinoForceMode') || 'STEBBINS'; 
+        let shuffleMode = localStorage.getItem('casinoShuffleMode') || 'NORMAL'; 
         let endingMode = localStorage.getItem('casinoEndingMode') || 'NORMAL'; 
+        let jqkAnimSuit = localStorage.getItem('casinoJqkSuit') || 'SPADES'; 
+        // Anim speed, default di 110 (hitungan inverse: 170 - 110 = 60ms)
+        let animSpeedVal = parseInt(localStorage.getItem('casinoAnimSpeed')) || 110; 
         
         const cardImg = document.getElementById('main-card');
         const versionText = document.getElementById('app-version');
         const secretResetBtn = document.getElementById('secret-reset-btn');
+        const animSpeedSlider = document.getElementById('anim-speed-slider');
 
         const valueCodes = {
             'ACE': '01', '2': '02', '3': '03', '4': '04', '5': '05',
@@ -269,6 +358,10 @@
         const stebbinsValues = ['ACE', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'JACK', 'QUEEN', 'KING'];
         const stebbinsSuits = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
         
+        const oddValues = ['ACE', '3', '5', '7', '9'];
+        const evenValues = ['2', '4', '6', '8', '10'];
+        const faceValues = ['JACK', 'QUEEN', 'KING'];
+        
         let valIdx = 0; let suitIdx = 0; 
         for(let i = 0; i < 52; i++) {
             stebbinsStack.push({ v: stebbinsValues[valIdx], s: stebbinsSuits[suitIdx] });
@@ -281,7 +374,7 @@
 
         async function init() {
             try {
-                updateSettingsUI(endingMode);
+                updateSettingsUI();
 
                 const response = await fetch(API_URL);
                 const data = await response.json();
@@ -307,12 +400,22 @@
         function prepareNextCard() {
             if (!isReady || deck.length === 0) return;
 
-            if (activeMode === 'STEBBINS' && currentCardData) {
-                const idx = getCardIndexInStack(stebbinsStack, currentCardData);
-                if (idx !== -1) {
-                    const nextIdx = (idx + 1) % 52;
-                    const target = stebbinsStack[nextIdx];
-                    upcomingCardData = deck.find(c => c.value === target.v && c.suit === target.s);
+            if (isForceActive) {
+                if (forceMode === 'STEBBINS' && currentCardData) {
+                    const idx = getCardIndexInStack(stebbinsStack, currentCardData);
+                    if (idx !== -1) {
+                        const nextIdx = (idx + 1) % 52;
+                        const target = stebbinsStack[nextIdx];
+                        upcomingCardData = deck.find(c => c.value === target.v && c.suit === target.s);
+                    } else {
+                        upcomingCardData = deck[Math.floor(Math.random() * deck.length)];
+                    }
+                } else if (forceMode === 'ODD') {
+                    const oddCards = deck.filter(c => oddValues.includes(c.value));
+                    upcomingCardData = oddCards[Math.floor(Math.random() * oddCards.length)];
+                } else if (forceMode === 'EVEN') {
+                    const evenCards = deck.filter(c => evenValues.includes(c.value));
+                    upcomingCardData = evenCards[Math.floor(Math.random() * evenCards.length)];
                 } else {
                     upcomingCardData = deck[Math.floor(Math.random() * deck.length)];
                 }
@@ -334,7 +437,7 @@
         }
 
         // ==========================================
-        // MODAL (POP-UP) LOGIC: COVER STORY
+        // MODAL (POP-UP) LOGIC
         // ==========================================
         const modal = document.getElementById('info-modal');
         const modalContent = document.getElementById('modal-content');
@@ -354,7 +457,7 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
         // ==========================================
-        // SECRET SETTINGS LOGIC (TRIPLE TAP)
+        // SECRET SETTINGS LOGIC
         // ==========================================
         const settingsModal = document.getElementById('settings-modal');
         let clickCount = 0;
@@ -370,34 +473,94 @@
             setTimeout(() => { settingsModal.classList.add('hidden'); settingsModal.classList.remove('flex'); }, 300);
         }
 
-        function updateSettingsUI(mode) {
-            const btnNormal = document.getElementById('btn-mode-normal');
-            const btnDisappear = document.getElementById('btn-mode-disappear');
+        function updateSettingsUI() {
+            ['STEBBINS', 'ODD', 'EVEN'].forEach(mode => {
+                const btn = document.getElementById(`btn-force-${mode.toLowerCase()}`);
+                if (forceMode === mode) {
+                    btn.classList.replace('text-white/50', 'text-white');
+                    btn.classList.add('bg-white/10', 'border-casino-gold');
+                } else {
+                    btn.classList.replace('text-white', 'text-white/50');
+                    btn.classList.remove('bg-white/10', 'border-casino-gold');
+                }
+            });
+
+            ['NORMAL', 'FORCED'].forEach(mode => {
+                const btn = document.getElementById(`btn-shuffle-${mode.toLowerCase()}`);
+                if (shuffleMode === mode) {
+                    btn.classList.replace('text-white/50', 'text-white');
+                    btn.classList.add('bg-white/10', 'border-casino-gold');
+                } else {
+                    btn.classList.replace('text-white', 'text-white/50');
+                    btn.classList.remove('bg-white/10', 'border-casino-gold');
+                }
+            });
+
+            ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'].forEach(suit => {
+                const btn = document.getElementById(`btn-jqk-${suit.toLowerCase()}`);
+                if (jqkAnimSuit === suit) {
+                    btn.classList.replace('text-white/50', 'text-white');
+                    btn.classList.add('bg-white/10', 'border-casino-gold');
+                } else {
+                    btn.classList.replace('text-white', 'text-white/50');
+                    btn.classList.remove('bg-white/10', 'border-casino-gold');
+                }
+            });
+
+            ['NORMAL', 'DISAPPEAR'].forEach(mode => {
+                const idSuffix = mode === 'NORMAL' ? 'normal' : 'disappear';
+                const btn = document.getElementById(`btn-mode-${idSuffix}`);
+                if (endingMode === mode) {
+                    btn.classList.replace('text-white/50', 'text-white');
+                    btn.classList.add('bg-white/10', 'border-casino-gold');
+                } else {
+                    btn.classList.replace('text-white', 'text-white/50');
+                    btn.classList.remove('bg-white/10', 'border-casino-gold');
+                }
+            });
             
-            if(mode === 'NORMAL') {
-                btnNormal.classList.replace('text-white/50', 'text-white');
-                btnNormal.classList.add('bg-white/10');
-                btnDisappear.classList.replace('text-white', 'text-white/50');
-                btnDisappear.classList.remove('bg-white/10');
-            } else {
-                btnDisappear.classList.replace('text-white/50', 'text-white');
-                btnDisappear.classList.add('bg-white/10');
-                btnNormal.classList.replace('text-white', 'text-white/50');
-                btnNormal.classList.remove('bg-white/10');
-            }
+            animSpeedSlider.value = animSpeedVal;
+        }
+
+        window.setForceMode = function(mode) {
+            if (forceMode === mode) return;
+            forceMode = mode;
+            localStorage.setItem('casinoForceMode', mode);
+            updateSettingsUI();
+            if (navigator.vibrate) navigator.vibrate(20);
+            resetTrickState();
+        }
+
+        window.setShuffleMode = function(mode) {
+            if (shuffleMode === mode) return;
+            shuffleMode = mode;
+            localStorage.setItem('casinoShuffleMode', mode);
+            updateSettingsUI();
+            if (navigator.vibrate) navigator.vibrate(20);
+        }
+
+        window.setJqkSuit = function(suit) {
+            if (jqkAnimSuit === suit) return;
+            jqkAnimSuit = suit;
+            localStorage.setItem('casinoJqkSuit', suit);
+            updateSettingsUI();
+            if (navigator.vibrate) navigator.vibrate(20);
         }
 
         window.setEndingMode = function(mode) {
             if (endingMode === mode) return;
-
             endingMode = mode;
             localStorage.setItem('casinoEndingMode', mode);
-            
-            updateSettingsUI(mode);
-            if (navigator.vibrate) navigator.vibrate(50);
-
+            updateSettingsUI();
+            if (navigator.vibrate) navigator.vibrate(20);
             resetTrickState();
         }
+
+        // Logic Slider Anim Speed
+        animSpeedSlider.addEventListener('input', (e) => {
+            animSpeedVal = parseInt(e.target.value);
+            localStorage.setItem('casinoAnimSpeed', animSpeedVal);
+        });
 
         // ==========================================
         // RESET TRICK STATE (TAP POJOK KANAN ATAS)
@@ -407,8 +570,9 @@
             isShuffling = false;
             isRevealed = false;
             isVanished = false;
-            activeMode = 'NONE';
+            isForceActive = false;
             currentCardData = null;
+            lastAnimCardCode = null;
             
             cardImg.classList.remove('shaking');
             cardImg.style.opacity = '1';
@@ -418,7 +582,6 @@
             if (navigator.vibrate) navigator.vibrate(50);
         }
 
-        // Binding tombol reset rahasia
         secretResetBtn.addEventListener('click', resetTrickState);
 
         // ==========================================
@@ -427,17 +590,13 @@
         let touchStartY = 0; let touchEndY = 0; let wasSwiped = false;
 
         cardImg.addEventListener('touchstart', (e) => { 
-            // Kalau kartu udah hilang, abaikan semua interaksi
             if (isVanished) return;
-
             touchStartY = e.touches[0].clientY; 
             wasSwiped = false; 
         }, { passive: false });
 
         cardImg.addEventListener('touchend', (e) => { 
-            // Kalau kartu udah hilang, abaikan semua interaksi
             if (isVanished) return;
-
             touchEndY = e.changedTouches[0].clientY; 
             handleGesture(); 
         });
@@ -449,12 +608,10 @@
                 wasSwiped = true; 
                 if (isShuffling) return; 
 
-                // CEK MODE VANISH: Kartu HILANG hanya kalau swipe dilakukan setelah Stebbins aktif
-                if (endingMode === 'DISAPPEAR' && isRevealed && !isVanished && activeMode === 'STEBBINS') {
+                if (endingMode === 'DISAPPEAR' && isRevealed && !isVanished && isForceActive) {
                     vanishCard();
                 } else {
-                    // Swipe pertama -> Langsung trigger Stebbins + Start
-                    toggleStebbinsAndStart(); 
+                    toggleForceAndStart(); 
                 }
             } else if (swipeDistance > 20) { 
                 wasSwiped = true; 
@@ -467,17 +624,16 @@
             isRevealed = false; 
         }
 
-        function toggleStebbinsAndStart() {
+        function toggleForceAndStart() {
             if (!isReady || deck.length === 0) return;
 
-            if (activeMode === 'STEBBINS') {
-                activeMode = 'NONE';
-                if (navigator.vibrate) navigator.vibrate([30, 50, 30]); 
-            } else {
-                activeMode = 'STEBBINS';
+            if (!isForceActive) {
+                isForceActive = true;
                 if (navigator.vibrate) navigator.vibrate([30, 30, 30]); 
+                prepareNextCard(); 
+            } else {
+                if (navigator.vibrate) navigator.vibrate([15, 15]); 
             }
-            prepareNextCard();
             startShuffle();
         }
 
@@ -485,13 +641,10 @@
         // MAIN ANIMATION LOGIC (TAP TO START/STOP)
         // ==========================================
         cardImg.addEventListener('click', (e) => {
-            // Kalau kartu udah hilang, abaikan klik sama sekali
             if (isVanished) return;
-            
             if (wasSwiped) return; 
             if (!isReady || deck.length === 0) return; 
 
-            // Logic deteksi Triple Tap
             clickCount++;
             if (clickCount === 1) {
                 clickTimer = setTimeout(() => {
@@ -505,7 +658,6 @@
                 return;
             }
 
-            // Normal Tap
             if (!isShuffling) {
                 startShuffle();
             } else {
@@ -520,11 +672,30 @@
             cardImg.style.opacity = '1'; 
             cardImg.classList.add('shaking');
             
-            const speedMs = 60; 
+            // Kalkulasi dinamis dari slider (20 - 150)
+            // Makin besar nilai slider = makin kecil ms-nya = makin cepat muternya
+            const actualSpeedMs = 170 - animSpeedVal; 
+            
             shuffleInterval = setInterval(() => {
-                const randomCard = deck[Math.floor(Math.random() * deck.length)];
+                let pool = deck;
+
+                if (isForceActive && shuffleMode === 'FORCED') {
+                    if (forceMode === 'ODD') {
+                        pool = deck.filter(c => oddValues.includes(c.value) || (faceValues.includes(c.value) && c.suit === jqkAnimSuit));
+                    } else if (forceMode === 'EVEN') {
+                        pool = deck.filter(c => evenValues.includes(c.value) || (faceValues.includes(c.value) && c.suit === jqkAnimSuit));
+                    }
+                }
+
+                let randomCard;
+                do {
+                    randomCard = pool[Math.floor(Math.random() * pool.length)];
+                } while (pool.length > 1 && randomCard.code === lastAnimCardCode);
+
+                lastAnimCardCode = randomCard.code;
                 cardImg.src = randomCard.image;
-            }, speedMs);
+                
+            }, actualSpeedMs);
         }
 
         function stopShuffle() {
