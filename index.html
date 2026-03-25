@@ -256,7 +256,6 @@
                 <button onclick="setEndingMode('NORMAL')" id="btn-mode-normal" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
                     Normal
                 </button>
-                <!-- Tombol Vanish dikasih ID khusus biar gampang didisable -->
                 <button onclick="setEndingMode('DISAPPEAR')" id="btn-mode-disappear" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
                     Vanish
                 </button>
@@ -330,7 +329,9 @@
         let shuffleInterval;
         let currentCardData = null; 
         let upcomingCardData = null; 
-        let lastAnimCardCode = null; 
+        
+        // Mengubah tracking dari KODE kartu ke NILAI ANGKA (value) biar nggak ada angka sama yg diulang
+        let lastAnimCardValue = null; 
         
         let isForceActive = false; 
         
@@ -358,9 +359,17 @@
         const stebbinsValues = ['ACE', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'JACK', 'QUEEN', 'KING'];
         const stebbinsSuits = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
         
-        const oddValues = ['ACE', '3', '5', '7', '9'];
-        const evenValues = ['2', '4', '6', '8', '10'];
         const faceValues = ['JACK', 'QUEEN', 'KING'];
+        
+        // Logika Red & Black untuk pola ODD/EVEN
+        const redSuits = ['HEARTS', 'DIAMONDS'];
+        const blackSuits = ['SPADES', 'CLUBS'];
+        
+        const lowOdd = ['ACE', '3', '5'];
+        const highOdd = ['7', '9'];
+        
+        const lowEven = ['2', '4', '6'];
+        const highEven = ['8', '10'];
         
         let valIdx = 0; let suitIdx = 0; 
         for(let i = 0; i < 52; i++) {
@@ -374,7 +383,6 @@
 
         async function init() {
             try {
-                // Pastikan konsistensi settingan sebelum UI digambar
                 if (forceMode !== 'STEBBINS' && endingMode === 'DISAPPEAR') {
                     endingMode = 'NORMAL';
                 }
@@ -397,6 +405,19 @@
             }
         }
 
+        function isForcedColorValid(card, mode) {
+            if (mode === 'ODD') {
+                if (lowOdd.includes(card.value) && redSuits.includes(card.suit)) return true;
+                if (highOdd.includes(card.value) && blackSuits.includes(card.suit)) return true;
+                return false;
+            } else if (mode === 'EVEN') {
+                if (lowEven.includes(card.value) && redSuits.includes(card.suit)) return true;
+                if (highEven.includes(card.value) && blackSuits.includes(card.suit)) return true;
+                return false;
+            }
+            return false;
+        }
+
         function getCardIndexInStack(stack, card) {
             return stack.findIndex(c => c.v === card.value && c.s === card.suit);
         }
@@ -414,12 +435,9 @@
                     } else {
                         upcomingCardData = deck[Math.floor(Math.random() * deck.length)];
                     }
-                } else if (forceMode === 'ODD') {
-                    const oddCards = deck.filter(c => oddValues.includes(c.value));
-                    upcomingCardData = oddCards[Math.floor(Math.random() * oddCards.length)];
-                } else if (forceMode === 'EVEN') {
-                    const evenCards = deck.filter(c => evenValues.includes(c.value));
-                    upcomingCardData = evenCards[Math.floor(Math.random() * evenCards.length)];
+                } else if (forceMode === 'ODD' || forceMode === 'EVEN') {
+                    const forcedPool = deck.filter(c => isForcedColorValid(c, forceMode));
+                    upcomingCardData = forcedPool[Math.floor(Math.random() * forcedPool.length)];
                 } else {
                     upcomingCardData = deck[Math.floor(Math.random() * deck.length)];
                 }
@@ -480,23 +498,17 @@
         function updateSettingsUI() {
             const isStebbins = forceMode === 'STEBBINS';
             
-            // Tangani disable/enable visual pada container menu
             const sectionShuffleJqk = document.getElementById('section-shuffle-jqk');
             const btnVanish = document.getElementById('btn-mode-disappear');
 
             if (isStebbins) {
-                // Disable Shuffle & JQK menu
                 sectionShuffleJqk.classList.add('opacity-20', 'pointer-events-none');
-                // Enable Vanish
                 btnVanish.classList.remove('opacity-20', 'pointer-events-none');
             } else {
-                // Enable Shuffle & JQK menu
                 sectionShuffleJqk.classList.remove('opacity-20', 'pointer-events-none');
-                // Disable Vanish
                 btnVanish.classList.add('opacity-20', 'pointer-events-none');
             }
 
-            // Update state tombol warna/border
             ['STEBBINS', 'ODD', 'EVEN'].forEach(mode => {
                 const btn = document.getElementById(`btn-force-${mode.toLowerCase()}`);
                 if (forceMode === mode) {
@@ -550,7 +562,6 @@
             forceMode = mode;
             localStorage.setItem('casinoForceMode', mode);
             
-            // Auto fix: kalau pindah dari Stebbins ke mode lain, matikan Vanish secara paksa
             if (forceMode !== 'STEBBINS' && endingMode === 'DISAPPEAR') {
                 endingMode = 'NORMAL';
                 localStorage.setItem('casinoEndingMode', 'NORMAL');
@@ -562,7 +573,6 @@
         }
 
         window.setShuffleMode = function(mode) {
-            // Abaikan klik jika di mode Stebbins
             if (forceMode === 'STEBBINS') return;
             if (shuffleMode === mode) return;
             shuffleMode = mode;
@@ -572,7 +582,6 @@
         }
 
         window.setJqkSuit = function(suit) {
-            // Abaikan klik jika di mode Stebbins
             if (forceMode === 'STEBBINS') return;
             if (jqkAnimSuit === suit) return;
             jqkAnimSuit = suit;
@@ -582,7 +591,6 @@
         }
 
         window.setEndingMode = function(mode) {
-            // Abaikan klik Vanish jika bukan di mode Stebbins
             if (forceMode !== 'STEBBINS' && mode === 'DISAPPEAR') return;
             if (endingMode === mode) return;
             endingMode = mode;
@@ -607,7 +615,7 @@
             isVanished = false;
             isForceActive = false;
             currentCardData = null;
-            lastAnimCardCode = null;
+            lastAnimCardValue = null; // Reset value tracker
             
             cardImg.classList.remove('shaking');
             cardImg.style.opacity = '1';
@@ -643,7 +651,6 @@
                 wasSwiped = true; 
                 if (isShuffling) return; 
 
-                // CEK MODE VANISH
                 if (forceMode === 'STEBBINS' && endingMode === 'DISAPPEAR' && isRevealed && !isVanished && isForceActive) {
                     vanishCard();
                 } else {
@@ -714,19 +721,21 @@
                 let pool = deck;
 
                 if (isForceActive && shuffleMode === 'FORCED' && forceMode !== 'STEBBINS') {
-                    if (forceMode === 'ODD') {
-                        pool = deck.filter(c => oddValues.includes(c.value) || (faceValues.includes(c.value) && c.suit === jqkAnimSuit));
-                    } else if (forceMode === 'EVEN') {
-                        pool = deck.filter(c => evenValues.includes(c.value) || (faceValues.includes(c.value) && c.suit === jqkAnimSuit));
-                    }
+                    pool = deck.filter(c => {
+                        if (faceValues.includes(c.value) && c.suit === jqkAnimSuit) return true;
+                        return isForcedColorValid(c, forceMode);
+                    });
                 }
 
                 let randomCard;
+                let loopGuard = 0;
+                // Anti-Duplicate Value: Cek berdasarkan ANGKA/NILAI, bukan kode kartu spesifik
                 do {
                     randomCard = pool[Math.floor(Math.random() * pool.length)];
-                } while (pool.length > 1 && randomCard.code === lastAnimCardCode);
+                    loopGuard++;
+                } while (pool.length > 1 && randomCard.value === lastAnimCardValue && loopGuard < 20);
 
-                lastAnimCardCode = randomCard.code;
+                lastAnimCardValue = randomCard.value;
                 cardImg.src = randomCard.image;
                 
             }, actualSpeedMs);
