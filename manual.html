@@ -63,7 +63,21 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen">
+<body class="font-sans antialiased min-h-screen relative">
+
+    <!-- Update Notification Pop-up -->
+    <div id="update-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 transition-opacity duration-300">
+        <div class="bg-gray-900 border border-casino-gold/50 rounded-xl p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-casino-gold"></div>
+            <h3 class="text-casino-gold font-serif text-2xl mb-2">Update v2.4</h3>
+            <p class="text-gray-300 text-sm font-light mb-6 leading-relaxed">
+                Added <strong class="text-white">Specific Card</strong> mode with Timer Delay, Peek Dot Indicator, and seamless transition to Auto-Stebbins.
+            </p>
+            <button onclick="closePopup()" class="w-full py-3 bg-casino-gold/10 text-casino-gold border border-casino-gold hover:bg-casino-gold hover:text-black transition-colors rounded uppercase tracking-widest text-xs font-medium">
+                Acknowledge
+            </button>
+        </div>
+    </div>
 
     <div class="max-w-3xl mx-auto px-6 py-10 md:py-16">
         
@@ -99,10 +113,13 @@
             <p class="mb-4 text-gray-300 font-light">
                 At the bottom center of the main screen, you will see a subtle version number: <code>v2.4.000</code>. This is your visual peek. The last three digits indicate the target card the system has locked onto.
             </p>
-            <ul class="list-disc pl-6 mb-6 space-y-2 text-gray-300 font-light">
+            <ul class="list-disc pl-6 mb-4 space-y-2 text-gray-300 font-light">
                 <li><span class="highlight">First Two Digits (Value):</span> <code>01</code> = Ace, <code>02</code> to <code>10</code> = Spot cards, <code>11</code> = Jack, <code>12</code> = Queen, <code>13</code> = King.</li>
                 <li><span class="highlight">Last Digit (Suit):</span> <code>1</code> = Spades (♠), <code>2</code> = Hearts (♥), <code>3</code> = Clubs (♣), <code>4</code> = Diamonds (♦).</li>
             </ul>
+            <p class="mb-6 text-gray-300 font-light">
+                <em>Note:</em> In Specific Card mode, a subtle <strong>dot (.)</strong> will appear at the very end of this version number (e.g., <code>v2.4.112.</code>) when the internal timer has elapsed, indicating the target card is locked.
+            </p>
             <p class="text-sm text-gray-400 italic bg-black/30 p-4 rounded border-l-2 border-casino-gold">
                 Example: If the text reads <code>v2.4.112</code>, the forced card will be the Jack of Hearts.
             </p>
@@ -118,10 +135,11 @@
                 <div>
                     <h3 class="text-lg text-white font-medium mb-1">A. Force Mode</h3>
                     <p class="text-gray-400 font-light text-sm">Dictates the sequence of cards forced when the system is activated.</p>
-                    <ul class="list-disc pl-5 mt-2 text-sm text-gray-300 space-y-1">
+                    <ul class="list-disc pl-5 mt-2 text-sm text-gray-300 space-y-2">
                         <li><strong>Stebbins Stack:</strong> Progresses through the classic Si Stebbins order (+3 value, alternating suits).</li>
-                        <li><strong>Odd (1,3,5,7,9):</strong> Forces only odd numbered cards. Built-in psychology: Low odds (A,3,5) are strictly Red. High odds (7,9) are strictly Black.</li>
+                        <li><strong>Odd (1,3,5,7,9):</strong> Forces only odd numbered cards. Low odds (A,3,5) are strictly Red. High odds (7,9) are strictly Black.</li>
                         <li><strong>Even (2,4,6,8,10):</strong> Forces only even numbered cards. Low evens (2,4,6) are strictly Red. High evens (8,10) are strictly Black.</li>
+                        <li><strong>Specific Card:</strong> Forces a single predetermined card based on a hidden timer. Unlocks a drawer to set your exact Target Card and Timer Delay (in seconds).</li>
                     </ul>
                 </div>
 
@@ -130,18 +148,18 @@
                     <p class="text-gray-400 font-light text-sm">Controls what the spectator sees during the shuffling animation (only applies to Odd/Even modes).</p>
                     <ul class="list-disc pl-5 mt-2 text-sm text-gray-300 space-y-1">
                         <li><strong>All Cards:</strong> The entire deck is shown during the blur.</li>
-                        <li><strong>Force Only:</strong> Only the cards within your chosen mode (e.g., only odd red/black cards) will be flashed during the animation. This provides subliminal conditioning for memory-based forces.</li>
+                        <li><strong>Force Only:</strong> Only the cards within your chosen mode will be flashed during the animation.</li>
                     </ul>
                 </div>
 
                 <div>
                     <h3 class="text-lg text-white font-medium mb-1">C. JQK Suit (Anim)</h3>
-                    <p class="text-gray-400 font-light text-sm">If you use the "Force Only" shuffle display, court cards (J,Q,K) are injected into the blur to make the deck feel complete. This setting selects which single suit those court cards will display.</p>
+                    <p class="text-gray-400 font-light text-sm">If you use the "Force Only" shuffle display, court cards (J,Q,K) are injected into the blur. This sets their specific suit.</p>
                 </div>
 
                 <div>
                     <h3 class="text-lg text-white font-medium mb-1">D. Anim Speed</h3>
-                    <p class="text-gray-400 font-light text-sm">A slider to control the velocity of the shuffling animation. Slide left for a slower, visible flip, or right for a high-speed blur.</p>
+                    <p class="text-gray-400 font-light text-sm">A slider to control the velocity of the shuffling animation.</p>
                 </div>
 
                 <div>
@@ -162,24 +180,26 @@
             <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
                 <h4 class="text-casino-gold font-medium mb-2">Normal Shuffle</h4>
                 <p class="text-gray-300 text-sm font-light">
-                    To prove the app is fair, <span class="highlight">Tap</span> the card to begin shuffling. <span class="highlight">Tap</span> again to stop. When initiated with a tap, the system performs a genuine random selection (including court cards). You can still read the peek before stopping.
+                    To prove the app is fair, <span class="highlight">Tap</span> the card to begin shuffling. <span class="highlight">Tap</span> again to stop. When initiated with a tap (outside of Specific Mode), the system performs a genuine random selection.
                 </p>
             </div>
 
             <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
                 <h4 class="text-casino-gold font-medium mb-2">Activating the Force</h4>
                 <p class="text-gray-300 text-sm font-light">
-                    When you are ready to activate your chosen force, perform a <span class="highlight">Swipe (Up or Down)</span> on the card. This movement should be as subtle as possible so it visually mimics a standard tap to the spectator. The device will deliver a subtle haptic vibration to confirm the force is locked, and the shuffle animation will begin immediately.
+                    When you are ready to activate your chosen force (Stebbins, Odd, or Even), perform a <span class="highlight">Swipe (Up or Down)</span> on the card. This movement should visually mimic a tap. The device will deliver a subtle haptic vibration to confirm the force is locked.
                 </p>
             </div>
 
-            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
-                <h4 class="text-casino-gold font-medium mb-2">Force on Stop</h4>
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-casino-gold/30">
+                <h4 class="text-casino-gold font-medium mb-2">Specific Card & Auto-Stebbins</h4>
                 <p class="text-gray-300 text-sm font-light mb-2">
-                    <em>Best with: Stebbins Stack or Normal Shuffle Display</em>
+                    <em>A hands-off approach for seamless routines.</em>
                 </p>
                 <p class="text-gray-300 text-sm font-light">
-                    After executing the Swipe, ask the spectator to say "stop", then <span class="highlight">Tap</span> the screen. The card will land precisely on your locked target, allowing you to reveal it via prediction or mind-reading.
+                    In Specific Card mode, you do not need to swipe. Hand the device to the spectator and let them <span class="highlight">Tap</span> to shuffle. <br><br>
+                    Monitor the visual peek at the bottom. Once the timer you set elapses, a <strong>dot (.)</strong> will appear at the end of the text. If the spectator taps to stop <em>after</em> the dot appears, they will land on your specific card. If they stop before, they receive a random card.<br><br>
+                    <strong>Auto-Stebbins Transition:</strong> Once the specific card has been successfully forced, the app automatically converts to Stebbins mode. From that point on, every normal <span class="highlight">Tap</span> by the spectator will naturally progress through the Stebbins stack, requiring zero input or swiping from you.
                 </p>
             </div>
 
@@ -189,11 +209,11 @@
                     <em>Best with: Odd/Even + Force Only Shuffle Display</em>
                 </p>
                 <p class="text-gray-300 text-sm font-light">
-                    Instead of stopping the card, ask the spectator to simply stare at the blurring animation and lock onto <em>one</em> card they happen to see passing by. Since you control the exact parameters (e.g., strictly Odd numbers with designated red/black color rules, plus one chosen Court suit), you already know the highly restricted pool of cards they could possibly see. Use classic fishing techniques to seamlessly nail their thought-of card.
+                    Instead of stopping the card, ask the spectator to simply stare at the blurring animation and lock onto <em>one</em> card they happen to see passing by. Use classic fishing techniques based on your restricted settings to seamlessly nail their thought-of card.
                 </p>
             </div>
 
-            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-casino-gold/30">
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
                 <h4 class="text-casino-gold font-medium mb-2">Vanish Mode</h4>
                 <p class="text-gray-300 text-sm font-light">
                     Before starting the routine, read the visual peek and physically palm the corresponding target card in your hand. Execute a Stebbins force so the target card is displayed on the screen. Give the spectator a moment to register it. <br><br>
@@ -226,12 +246,22 @@
         <!-- Footer -->
         <footer class="mt-20 text-center border-t border-white/10 pt-8">
             <p class="text-gray-500 text-xs uppercase tracking-widest">
-                enjoy 😇<br>
+                Confidential - For Professional Use Only<br>
                 &copy; 2026 Heri Sanjaya
             </p>
         </footer>
 
     </div>
 
+    <!-- Script for Pop-up -->
+    <script>
+        function closePopup() {
+            const popup = document.getElementById('update-popup');
+            popup.classList.add('opacity-0');
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+    </script>
 </body>
 </html>
