@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Force by Heri Sanjaya - Operation Manual</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        casino: {
+                            dark: '#020617',
+                            green: '#064e3b',
+                            gold: '#d4af37',
+                            light: '#e2e8f0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617;
+            background-image: radial-gradient(circle at 50% 0%, #064e3b 0%, #020617 60%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        h2 {
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            margin-top: 2.5rem;
+        }
+        .highlight {
+            color: #d4af37;
+            font-weight: 500;
+        }
+        code {
+            background: rgba(0,0,0,0.5);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #d4af37;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen">
+
+    <div class="max-w-3xl mx-auto px-6 py-16">
+        
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <div class="text-casino-gold text-3xl tracking-[0.3em] mb-4 opacity-80">♠♥♣♦</div>
+            <h1 class="font-serif text-4xl md:text-5xl text-casino-gold font-bold tracking-wide mb-2 uppercase">Pro Force</h1>
+            <p class="text-gray-400 tracking-widest text-sm uppercase">Created by Heri Sanjaya</p>
+        </header>
+
+        <!-- Introduction -->
+        <section class="glass-panel p-8 rounded-xl shadow-2xl mb-12">
+            <p class="text-gray-300 font-light leading-relaxed">
+                Welcome to the operational manual for <span class="highlight">Pro Force</span>. This application is designed to look like a standard casino game utility used to randomly select a starting card. Beneath the surface, it is a highly customizable, covert forcing tool designed for professional working magicians.
+            </p>
+        </section>
+
+        <!-- Table of Contents / Main Content -->
+        <main>
+            <!-- 1. The Cover -->
+            <h2 class="font-serif text-2xl text-casino-gold tracking-wide">1. The Cover Screen</h2>
+            <p class="mb-4 text-gray-300 font-light">
+                Upon launching the app, you are greeted with a fake setup screen asking, "What game are we playing today?". This facade disarms the spectator. Tap any game button or click "Skip Setup" to proceed to the main interface.
+            </p>
+
+            <!-- 2. The Peek -->
+            <h2 class="font-serif text-2xl text-casino-gold tracking-wide">2. The Peek System</h2>
+            <p class="mb-4 text-gray-300 font-light">
+                At the bottom center of the main screen, you will see a subtle version number: <code>v2.4.000</code>. This is your visual peek. The last three digits indicate the target card the system has locked onto.
+            </p>
+            <ul class="list-disc pl-6 mb-6 space-y-2 text-gray-300 font-light">
+                <li><span class="highlight">First Two Digits (Value):</span> <code>01</code> = Ace, <code>02</code> to <code>10</code> = Spot cards, <code>11</code> = Jack, <code>12</code> = Queen, <code>13</code> = King.</li>
+                <li><span class="highlight">Last Digit (Suit):</span> <code>1</code> = Spades (♠), <code>2</code> = Hearts (♥), <code>3</code> = Clubs (♣), <code>4</code> = Diamonds (♦).</li>
+            </ul>
+            <p class="text-sm text-gray-400 italic bg-black/30 p-4 rounded border-l-2 border-casino-gold">
+                Example: If the text reads <code>v2.4.112</code>, the forced card will be the Jack of Hearts.
+            </p>
+
+            <!-- 3. Accessing Settings -->
+            <h2 class="font-serif text-2xl text-casino-gold tracking-wide">3. The Secret Settings Menu</h2>
+            <p class="mb-4 text-gray-300 font-light">
+                To access the configuration menu, perform a <span class="highlight">Triple Tap</span> rapidly on the center of the card. Your settings are saved locally to your device, so you do not need to reconfigure them before every performance.
+            </p>
+
+            <!-- Settings Breakdown -->
+            <div class="space-y-6 ml-4 border-l border-white/10 pl-6 my-8">
+                <div>
+                    <h3 class="text-lg text-white font-medium mb-1">A. Force Mode</h3>
+                    <p class="text-gray-400 font-light text-sm">Dictates the sequence of cards forced when the system is activated.</p>
+                    <ul class="list-disc pl-5 mt-2 text-sm text-gray-300 space-y-1">
+                        <li><strong>Stebbins Stack:</strong> Progresses through the classic Si Stebbins order (+3 value, alternating suits).</li>
+                        <li><strong>Odd (1,3,5,7,9):</strong> Forces only odd numbered cards. Built-in psychology: Low odds (A,3,5) are strictly Red. High odds (7,9) are strictly Black.</li>
+                        <li><strong>Even (2,4,6,8,10):</strong> Forces only even numbered cards. Low evens (2,4,6) are strictly Red. High evens (8,10) are strictly Black.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg text-white font-medium mb-1">B. Shuffle Display</h3>
+                    <p class="text-gray-400 font-light text-sm">Controls what the spectator sees during the shuffling animation (only applies to Odd/Even modes).</p>
+                    <ul class="list-disc pl-5 mt-2 text-sm text-gray-300 space-y-1">
+                        <li><strong>All Cards:</strong> The entire deck is shown during the blur.</li>
+                        <li><strong>Force Only:</strong> Only the cards within your chosen mode (e.g., only odd red/black cards) will be flashed during the animation. This provides subliminal conditioning for memory-based forces.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg text-white font-medium mb-1">C. JQK Suit (Anim)</h3>
+                    <p class="text-gray-400 font-light text-sm">If you use the "Force Only" shuffle display, court cards (J,Q,K) are injected into the blur to make the deck feel complete. This setting selects which single suit those court cards will display.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-lg text-white font-medium mb-1">D. Anim Speed</h3>
+                    <p class="text-gray-400 font-light text-sm">A slider to control the velocity of the shuffling animation. Slide left for a slower, visible flip, or right for a high-speed blur.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-lg text-white font-medium mb-1">E. Ending Mode</h3>
+                    <ul class="list-disc pl-5 mt-2 text-sm text-gray-300 space-y-1">
+                        <li><strong>Normal:</strong> The card remains on screen indefinitely after the force.</li>
+                        <li><strong>Vanish:</strong> Unlocks the ability to manually vanish the card from the screen at the end of your routine (Only available when using the Stebbins mode).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4. Performance Handling -->
+            <h2 class="font-serif text-2xl text-casino-gold tracking-wide">4. Performance Handling & Gestures</h2>
+            <p class="mb-4 text-gray-300 font-light">
+                The core philosophy of Pro Force is to use standard gestures to separate legitimate interactions from covert triggers.
+            </p>
+            
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
+                <h4 class="text-casino-gold font-medium mb-2">Normal Shuffle</h4>
+                <p class="text-gray-300 text-sm font-light">
+                    To prove the app is fair, <span class="highlight">Tap</span> the card to begin shuffling. <span class="highlight">Tap</span> again to stop. When initiated with a tap, the system performs a genuine random selection (including court cards). You can still read the peek before stopping.
+                </p>
+            </div>
+
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
+                <h4 class="text-casino-gold font-medium mb-2">Activating the Force</h4>
+                <p class="text-gray-300 text-sm font-light">
+                    When you are ready to activate your chosen force, perform a <span class="highlight">Swipe (Up or Down)</span> on the card. This movement should be as subtle as possible so it visually mimics a standard tap to the spectator. The device will deliver a subtle haptic vibration to confirm the force is locked, and the shuffle animation will begin immediately.
+                </p>
+            </div>
+
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
+                <h4 class="text-casino-gold font-medium mb-2">Force on Stop</h4>
+                <p class="text-gray-300 text-sm font-light mb-2">
+                    <em>Best with: Stebbins Stack or Normal Shuffle Display</em>
+                </p>
+                <p class="text-gray-300 text-sm font-light">
+                    After executing the Swipe, ask the spectator to say "stop", then <span class="highlight">Tap</span> the screen. The card will land precisely on your locked target, allowing you to reveal it via prediction or mind-reading.
+                </p>
+            </div>
+
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-white/5">
+                <h4 class="text-casino-gold font-medium mb-2">Force during Shuffle</h4>
+                <p class="text-gray-300 text-sm font-light mb-2">
+                    <em>Best with: Odd/Even + Force Only Shuffle Display</em>
+                </p>
+                <p class="text-gray-300 text-sm font-light">
+                    Instead of stopping the card, ask the spectator to simply stare at the blurring animation and lock onto <em>one</em> card they happen to see passing by. Since you control the exact parameters (e.g., strictly Odd numbers with designated red/black color rules, plus one chosen Court suit), you already know the highly restricted pool of cards they could possibly see. Use classic fishing techniques to seamlessly nail their thought-of card.
+                </p>
+            </div>
+
+            <div class="bg-black/40 rounded-lg p-6 mb-6 border border-casino-gold/30">
+                <h4 class="text-casino-gold font-medium mb-2">Vanish Mode</h4>
+                <p class="text-gray-300 text-sm font-light">
+                    Before starting the routine, read the visual peek and physically palm the corresponding target card in your hand. Execute a Stebbins force so the target card is displayed on the screen. Give the spectator a moment to register it. <br><br>
+                    <strong>Important Technical Note:</strong> The <em>first</em> swipe you perform activates the Stebbins sequence. To execute the vanish, cover the screen with your palming hand while simultaneously executing a subtle <span class="highlight">secondary Swipe</span>. The <em>second</em> swipe is what triggers the instant vanish of the digital card, leaving the physical card in your hand. <br><br>
+                    <em>Safety Feature:</em> Once the card vanishes, the screen goes into absolute lockdown. It will ignore all taps and swipes.
+                </p>
+            </div>
+
+            <!-- 5. Pro Routine -->
+            <h2 class="font-serif text-2xl text-casino-gold tracking-wide">5. Routine Idea</h2>
+            <div class="glass-panel p-6 rounded-lg mb-8">
+                <ol class="list-decimal pl-5 space-y-4 text-sm text-gray-300 font-light">
+                    <li><strong>Step 1:</strong> Arrange your physical deck in a reversed Si Stebbins stack using the "SHoCkeD" suit order (Spades, Hearts, Clubs, Diamonds). Ensure the app is set to <span class="highlight">Stebbins Stack</span> mode.</li>
+                    <li><strong>Step 2:</strong> Read the peek on the app to know the first digital target card. Spread your physical deck, locate that card, and cut it to the top <em>along with the card immediately to its left</em> (which represents the next card in the sequence).</li>
+                    <li><strong>Step 3:</strong> Perform a Double Lift to show the top card as your prediction. Have the spectator swipe the app (which triggers the first force) and tap to stop. The digital card perfectly matches your physical prediction.</li>
+                    <li><strong>Step 4:</strong> Turn your Double Lift face down. Take the actual top card and place it face-down onto the phone screen, leaving enough room for the spectator to tap.</li>
+                    <li><strong>Step 5:</strong> Ask the spectator to tap the screen to shuffle again, and tap once more to stop. Because the app is in Stebbins mode, it automatically forces the next card in the sequence.</li>
+                    <li><strong>Step 6:</strong> Have the spectator turn over the physical card resting on the phone. It has visually changed to match the new digital card they just stopped on.</li>
+                </ol>
+            </div>
+
+            <!-- 6. Reset -->
+            <h2 class="font-serif text-2xl text-casino-gold tracking-wide">6. Emergency Hard Reset</h2>
+            <p class="mb-4 text-gray-300 font-light">
+                There is an invisible 80x80 pixel hitbox located in the <span class="highlight">Top-Right Corner</span> of the screen. Tapping this area will instantly kill the force, reset the card to its face-down state, and ready the app for the next performance. Use this after a Vanish or if you need to abort a routine.
+            </p>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-20 text-center border-t border-white/10 pt-8">
+            <p class="text-gray-500 text-xs uppercase tracking-widest">
+                Confidential - For Professional Use Only<br>
+                &copy; 2026 Heri Sanjaya
+            </p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
