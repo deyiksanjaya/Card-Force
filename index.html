@@ -252,7 +252,7 @@
             </div>
 
             <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1">Ending Mode</h3>
-            <div class="space-y-2 mb-4">
+            <div class="space-y-2 mb-8">
                 <button onclick="setEndingMode('NORMAL')" id="btn-mode-normal" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
                     Normal
                 </button>
@@ -261,9 +261,17 @@
                 </button>
             </div>
 
-            <button onclick="closeSettings()" class="mt-6 text-white/30 text-[10px] tracking-widest uppercase hover:text-white transition-colors border border-white/10 px-6 py-2 rounded-full">
-                Close Settings
-            </button>
+            <!-- Manual & Close Section -->
+            <div class="flex flex-col items-center gap-4 mt-2">
+                <a href="manual.html" class="block w-full py-3 bg-casino-gold/10 border border-casino-gold/50 text-casino-gold text-[10px] tracking-[0.2em] uppercase transition-all duration-300 rounded-sm hover:bg-casino-gold hover:text-black">
+                    Read Manual
+                </a>
+
+                <button onclick="closeSettings()" class="text-white/30 text-[10px] tracking-widest uppercase hover:text-white transition-colors border border-white/10 px-6 py-2 rounded-full">
+                    Close Settings
+                </button>
+            </div>
+            
         </div>
     </div>
 
