@@ -206,7 +206,7 @@
     <!-- MODAL POP-UP 2: SECRET SETTINGS       -->
     <!-- ===================================== -->
     <div id="settings-modal" class="fixed inset-0 bg-black/95 hidden flex-col items-center justify-center z-50 opacity-0 transition-opacity duration-300 p-4 pt-10">
-        <div class="w-full max-w-xs text-center custom-scroll max-h-[85vh] overflow-y-auto pr-3 pb-6" id="settings-content">
+        <div class="w-full max-w-xs text-center custom-scroll max-h-[85vh] overflow-y-auto pr-3 pb-6 overscroll-contain" id="settings-content">
             
             <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1 mt-2">Force Mode</h3>
             <div class="space-y-2 mb-6">
@@ -219,9 +219,48 @@
                 <button onclick="setForceMode('EVEN')" id="btn-force-even" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
                     Even (2,4,6,8,10)
                 </button>
+                <button onclick="setForceMode('SPECIFIC')" id="btn-force-specific" class="w-full py-2 border border-white/20 text-white/50 text-xs tracking-widest uppercase transition-all duration-300 rounded-sm">
+                    Specific Card
+                </button>
+                
+                <!-- Specific Card Drawer Settings -->
+                <div id="drawer-specific" class="overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+                    <div class="p-3 bg-white/5 border border-white/10 rounded-sm mt-2 mb-2 space-y-3">
+                        <div class="flex justify-between gap-2">
+                            <select id="spec-val" class="bg-black/80 text-casino-gold border border-white/20 text-xs w-full p-1.5 outline-none text-center" onchange="updateSpecSettings()">
+                                <option value="ACE">Ace</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="JACK">Jack</option>
+                                <option value="QUEEN">Queen</option>
+                                <option value="KING">King</option>
+                            </select>
+                            <select id="spec-suit" class="bg-black/80 text-casino-gold border border-white/20 text-xs w-full p-1.5 outline-none text-center" onchange="updateSpecSettings()">
+                                <option value="SPADES">Spades ♠</option>
+                                <option value="HEARTS">Hearts ♥</option>
+                                <option value="CLUBS">Clubs ♣</option>
+                                <option value="DIAMONDS">Diamonds ♦</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] text-white/50 mb-1">
+                                <span>Timer Delay</span>
+                                <span id="spec-timer-display">3s</span>
+                            </div>
+                            <input type="range" id="spec-timer" min="1" max="10" value="3" class="w-full" oninput="updateSpecSettings()">
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Wrapper buat fitur yang dimatikan pas Stebbins -->
+            <!-- Wrapper buat fitur yang dimatikan pas Stebbins / Specific -->
             <div id="section-shuffle-jqk" class="transition-opacity duration-300">
                 <h3 class="font-mono text-white/50 text-[10px] tracking-[0.3em] uppercase mb-3 border-b border-white/10 pb-1">Shuffle Display</h3>
                 <div class="space-y-2 mb-5">
@@ -296,35 +335,7 @@
         document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${URL.createObjectURL(manifestBlob)}">`);
 
         // ==========================================
-        // UI TRANSITION LOGIC
-        // ==========================================
-        const setupScreen = document.getElementById('setup-screen');
-        const mainScreen = document.getElementById('main-screen');
-        const gameBtns = document.querySelectorAll('.game-btn');
-        const skipBtn = document.getElementById('skip-btn');
-        
-        const mainTitle = document.getElementById('main-title');
-        const modalTitle = document.getElementById('modal-title');
-        const modalGameName = document.getElementById('modal-game-name');
-
-        function startApp(gameName) {
-            let displayGame = gameName ? gameName : "Custom Rules";
-            mainTitle.innerHTML = `${displayGame}<br><span class="font-sans text-[10px] tracking-[0.4em] opacity-60">CARD SELECTOR</span>`;
-            modalTitle.innerText = `${displayGame} Rules`;
-            modalGameName.innerText = displayGame;
-
-            setupScreen.classList.add('opacity-0');
-            setTimeout(() => {
-                setupScreen.classList.add('hidden'); 
-                mainScreen.classList.remove('opacity-0', 'pointer-events-none');
-            }, 500);
-        }
-
-        gameBtns.forEach(btn => btn.addEventListener('click', (e) => startApp(e.target.innerText)));
-        skipBtn.addEventListener('click', () => startApp(''));
-
-        // ==========================================
-        // API & STATE INITIALIZATION
+        // ALL STATE VARIABLES
         // ==========================================
         const API_URL = 'https://deckofcardsapi.com/api/deck/new/draw/?count=52';
         let deck = [];
@@ -333,27 +344,53 @@
         let isShuffling = false; 
         let isRevealed = false; 
         let isVanished = false; 
+        let isForceActive = false; 
         
         let shuffleInterval;
         let currentCardData = null; 
         let upcomingCardData = null; 
-        
-        // Mengubah tracking dari KODE kartu ke NILAI ANGKA (value) biar nggak ada angka sama yg diulang
         let lastAnimCardValue = null; 
         
-        let isForceActive = false; 
+        // Mode Auto-Stebbins dari transisi
+        let isContinuousForce = false;
         
+        // Touch & Click Tracking Variables
+        let clickCount = 0;
+        let clickTimer = null;
+        let touchStartY = 0; 
+        let touchEndY = 0; 
+        let wasSwiped = false;
+        
+        // Timer Force Logic
+        let specificTimerTimeout = null;
+        let isSpecificTimerReached = false;
+        
+        // Settings State from LocalStorage
         let forceMode = localStorage.getItem('casinoForceMode') || 'STEBBINS'; 
         let shuffleMode = localStorage.getItem('casinoShuffleMode') || 'NORMAL'; 
         let endingMode = localStorage.getItem('casinoEndingMode') || 'NORMAL'; 
         let jqkAnimSuit = localStorage.getItem('casinoJqkSuit') || 'SPADES'; 
         let animSpeedVal = parseInt(localStorage.getItem('casinoAnimSpeed')) || 110; 
         
+        let specVal = localStorage.getItem('casinoSpecVal') || 'JACK';
+        let specSuit = localStorage.getItem('casinoSpecSuit') || 'HEARTS';
+        let specTime = parseInt(localStorage.getItem('casinoSpecTime')) || 3;
+        
+        // DOM Elements
         const cardImg = document.getElementById('main-card');
         const versionText = document.getElementById('app-version');
         const secretResetBtn = document.getElementById('secret-reset-btn');
         const animSpeedSlider = document.getElementById('anim-speed-slider');
+        const settingsModal = document.getElementById('settings-modal');
+        const modal = document.getElementById('info-modal');
+        const modalContent = document.getElementById('modal-content');
+        const setupScreen = document.getElementById('setup-screen');
+        const mainScreen = document.getElementById('main-screen');
+        const mainTitle = document.getElementById('main-title');
+        const modalTitle = document.getElementById('modal-title');
+        const modalGameName = document.getElementById('modal-game-name');
 
+        // Constants
         const valueCodes = {
             'ACE': '01', '2': '02', '3': '03', '4': '04', '5': '05',
             '6': '06', '7': '07', '8': '08', '9': '09', '10': '10',
@@ -366,16 +403,11 @@
         const stebbinsStack = [];
         const stebbinsValues = ['ACE', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'JACK', 'QUEEN', 'KING'];
         const stebbinsSuits = ['SPADES', 'HEARTS', 'CLUBS', 'DIAMONDS'];
-        
         const faceValues = ['JACK', 'QUEEN', 'KING'];
-        
-        // Logika Red & Black untuk pola ODD/EVEN
         const redSuits = ['HEARTS', 'DIAMONDS'];
         const blackSuits = ['SPADES', 'CLUBS'];
-        
         const lowOdd = ['ACE', '3', '5'];
         const highOdd = ['7', '9'];
-        
         const lowEven = ['2', '4', '6'];
         const highEven = ['8', '10'];
         
@@ -385,6 +417,9 @@
             valIdx = (valIdx + 3) % 13; suitIdx = (suitIdx + 1) % 4; 
         }
 
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
         const preloadImages = (urls) => Promise.all(urls.map(url => new Promise((resolve) => {
             const img = new Image(); img.src = url; img.onload = resolve; img.onerror = resolve; 
         })));
@@ -393,6 +428,7 @@
             try {
                 if (forceMode !== 'STEBBINS' && endingMode === 'DISAPPEAR') {
                     endingMode = 'NORMAL';
+                    localStorage.setItem('casinoEndingMode', 'NORMAL');
                 }
                 updateSettingsUI();
 
@@ -433,7 +469,7 @@
         function prepareNextCard() {
             if (!isReady || deck.length === 0) return;
 
-            if (isForceActive) {
+            if (isForceActive && forceMode !== 'SPECIFIC') {
                 if (forceMode === 'STEBBINS' && currentCardData) {
                     const idx = getCardIndexInStack(stebbinsStack, currentCardData);
                     if (idx !== -1) {
@@ -467,31 +503,41 @@
         }
 
         // ==========================================
-        // MODAL (POP-UP) LOGIC
+        // UI TRANSITIONS & MODALS
         // ==========================================
-        const modal = document.getElementById('info-modal');
-        const modalContent = document.getElementById('modal-content');
-        const openBtn = document.getElementById('open-modal-btn');
-        const closeBtn = document.getElementById('close-modal-btn');
+        function startApp(gameName) {
+            let displayGame = gameName ? gameName : "Custom Rules";
+            mainTitle.innerHTML = `${displayGame}<br><span class="font-sans text-[10px] tracking-[0.4em] opacity-60">CARD SELECTOR</span>`;
+            modalTitle.innerText = `${displayGame} Rules`;
+            modalGameName.innerText = displayGame;
 
-        function openModal() {
+            setupScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                setupScreen.classList.add('hidden'); 
+                mainScreen.classList.remove('opacity-0', 'pointer-events-none');
+            }, 500);
+        }
+
+        document.querySelectorAll('.game-btn').forEach(btn => btn.addEventListener('click', (e) => startApp(e.target.innerText)));
+        document.getElementById('skip-btn').addEventListener('click', () => startApp(''));
+
+        document.getElementById('open-modal-btn').addEventListener('click', () => {
             modal.classList.remove('hidden'); modal.classList.add('flex');
             setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); modalContent.classList.add('scale-100'); }, 10);
-        }
-        function closeModal() {
+        });
+        
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
             modal.classList.add('opacity-0'); modalContent.classList.remove('scale-100'); modalContent.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
-        }
-        openBtn.addEventListener('click', openModal);
-        closeBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        });
+        
+        modal.addEventListener('click', (e) => { if (e.target === modal) document.getElementById('close-modal-btn').click(); });
 
-        // ==========================================
-        // SECRET SETTINGS LOGIC
-        // ==========================================
-        const settingsModal = document.getElementById('settings-modal');
-        let clickCount = 0;
-        let clickTimer = null;
+        settingsModal.addEventListener('touchmove', (e) => {
+            if (e.target === settingsModal) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
         function openSettings() {
             settingsModal.classList.remove('hidden'); settingsModal.classList.add('flex');
@@ -503,21 +549,54 @@
             setTimeout(() => { settingsModal.classList.add('hidden'); settingsModal.classList.remove('flex'); }, 300);
         }
 
+        // ==========================================
+        // SETTINGS LOGIC
+        // ==========================================
+        function updateSpecSettings() {
+            specVal = document.getElementById('spec-val').value;
+            specSuit = document.getElementById('spec-suit').value;
+            specTime = parseInt(document.getElementById('spec-timer').value);
+            
+            document.getElementById('spec-timer-display').innerText = specTime + 's';
+            
+            localStorage.setItem('casinoSpecVal', specVal);
+            localStorage.setItem('casinoSpecSuit', specSuit);
+            localStorage.setItem('casinoSpecTime', specTime);
+        }
+
         function updateSettingsUI() {
             const isStebbins = forceMode === 'STEBBINS';
+            const isSpecific = forceMode === 'SPECIFIC';
             
             const sectionShuffleJqk = document.getElementById('section-shuffle-jqk');
             const btnVanish = document.getElementById('btn-mode-disappear');
+            const drawerSpecific = document.getElementById('drawer-specific');
+
+            if (isSpecific) {
+                drawerSpecific.classList.remove('max-h-0', 'opacity-0');
+                drawerSpecific.classList.add('max-h-[250px]', 'opacity-100');
+                
+                document.getElementById('spec-val').value = specVal;
+                document.getElementById('spec-suit').value = specSuit;
+                document.getElementById('spec-timer').value = specTime;
+                document.getElementById('spec-timer-display').innerText = specTime + 's';
+            } else {
+                drawerSpecific.classList.add('max-h-0', 'opacity-0');
+                drawerSpecific.classList.remove('max-h-[250px]', 'opacity-100');
+            }
 
             if (isStebbins) {
                 sectionShuffleJqk.classList.add('opacity-20', 'pointer-events-none');
                 btnVanish.classList.remove('opacity-20', 'pointer-events-none');
+            } else if (isSpecific) {
+                sectionShuffleJqk.classList.add('opacity-20', 'pointer-events-none');
+                btnVanish.classList.add('opacity-20', 'pointer-events-none');
             } else {
                 sectionShuffleJqk.classList.remove('opacity-20', 'pointer-events-none');
                 btnVanish.classList.add('opacity-20', 'pointer-events-none');
             }
 
-            ['STEBBINS', 'ODD', 'EVEN'].forEach(mode => {
+            ['STEBBINS', 'ODD', 'EVEN', 'SPECIFIC'].forEach(mode => {
                 const btn = document.getElementById(`btn-force-${mode.toLowerCase()}`);
                 if (forceMode === mode) {
                     btn.classList.replace('text-white/50', 'text-white');
@@ -566,7 +645,8 @@
         }
 
         window.setForceMode = function(mode) {
-            if (forceMode === mode) return;
+            // Hapus pengecekan if (forceMode === mode) return; 
+            // agar bisa selalu memicu reset jika dipencet lagi
             forceMode = mode;
             localStorage.setItem('casinoForceMode', mode);
             
@@ -581,7 +661,7 @@
         }
 
         window.setShuffleMode = function(mode) {
-            if (forceMode === 'STEBBINS') return;
+            if (forceMode === 'STEBBINS' || forceMode === 'SPECIFIC') return;
             if (shuffleMode === mode) return;
             shuffleMode = mode;
             localStorage.setItem('casinoShuffleMode', mode);
@@ -590,7 +670,7 @@
         }
 
         window.setJqkSuit = function(suit) {
-            if (forceMode === 'STEBBINS') return;
+            if (forceMode === 'STEBBINS' || forceMode === 'SPECIFIC') return;
             if (jqkAnimSuit === suit) return;
             jqkAnimSuit = suit;
             localStorage.setItem('casinoJqkSuit', suit);
@@ -618,12 +698,17 @@
         // ==========================================
         function resetTrickState() {
             if (shuffleInterval) clearInterval(shuffleInterval);
+            if (specificTimerTimeout) clearTimeout(specificTimerTimeout);
+            
             isShuffling = false;
             isRevealed = false;
             isVanished = false;
             isForceActive = false;
+            isSpecificTimerReached = false;
+            isContinuousForce = false; // Reset saklar auto-stebbins
+            
             currentCardData = null;
-            lastAnimCardValue = null; // Reset value tracker
+            lastAnimCardValue = null; 
             
             cardImg.classList.remove('shaking');
             cardImg.style.opacity = '1';
@@ -636,10 +721,8 @@
         secretResetBtn.addEventListener('click', resetTrickState);
 
         // ==========================================
-        // GESTURE SWIPE LOGIC
+        // GESTURE & ANIMATION LOGIC
         // ==========================================
-        let touchStartY = 0; let touchEndY = 0; let wasSwiped = false;
-
         cardImg.addEventListener('touchstart', (e) => { 
             if (isVanished) return;
             touchStartY = e.touches[0].clientY; 
@@ -658,6 +741,11 @@
             if (swipeDistance > 50) { 
                 wasSwiped = true; 
                 if (isShuffling) return; 
+
+                if (forceMode === 'SPECIFIC') {
+                    startShuffle();
+                    return;
+                }
 
                 if (forceMode === 'STEBBINS' && endingMode === 'DISAPPEAR' && isRevealed && !isVanished && isForceActive) {
                     vanishCard();
@@ -688,20 +776,23 @@
             startShuffle();
         }
 
-        // ==========================================
-        // MAIN ANIMATION LOGIC 
-        // ==========================================
         cardImg.addEventListener('click', (e) => {
             if (isVanished) return;
-            if (wasSwiped) return; 
+            
+            if (wasSwiped) {
+                wasSwiped = false; 
+                return;
+            }
             if (!isReady || deck.length === 0) return; 
 
             clickCount++;
             if (clickCount === 1) {
                 clickTimer = setTimeout(() => {
-                    clickCount = 0;
+                    clickCount = 0; 
                 }, 600); 
-            } else if (clickCount === 3) {
+            } 
+            
+            if (clickCount === 3) {
                 clearTimeout(clickTimer);
                 clickCount = 0;
                 openSettings();
@@ -710,6 +801,16 @@
             }
 
             if (!isShuffling) {
+                if (forceMode === 'SPECIFIC') {
+                    prepareNextCard();
+                } else {
+                    if (isContinuousForce) {
+                        isForceActive = true;
+                    } else {
+                        isForceActive = false;
+                    }
+                    prepareNextCard();
+                }
                 startShuffle();
             } else {
                 stopShuffle();
@@ -723,12 +824,26 @@
             cardImg.style.opacity = '1'; 
             cardImg.classList.add('shaking');
             
+            if (forceMode === 'SPECIFIC') {
+                isSpecificTimerReached = false;
+                if (specificTimerTimeout) clearTimeout(specificTimerTimeout);
+                
+                specificTimerTimeout = setTimeout(() => {
+                    isSpecificTimerReached = true;
+                    upcomingCardData = deck.find(c => c.value === specVal && c.suit === specSuit);
+                    
+                    if (!versionText.innerText.endsWith('.')) {
+                        versionText.innerText += '.';
+                    }
+                }, specTime * 1000);
+            }
+
             const actualSpeedMs = 170 - animSpeedVal; 
             
             shuffleInterval = setInterval(() => {
                 let pool = deck;
 
-                if (isForceActive && shuffleMode === 'FORCED' && forceMode !== 'STEBBINS') {
+                if (isForceActive && shuffleMode === 'FORCED' && forceMode !== 'STEBBINS' && forceMode !== 'SPECIFIC') {
                     pool = deck.filter(c => {
                         if (faceValues.includes(c.value) && c.suit === jqkAnimSuit) return true;
                         return isForcedColorValid(c, forceMode);
@@ -737,7 +852,6 @@
 
                 let randomCard;
                 let loopGuard = 0;
-                // Anti-Duplicate Value: Cek berdasarkan ANGKA/NILAI, bukan kode kartu spesifik
                 do {
                     randomCard = pool[Math.floor(Math.random() * pool.length)];
                     loopGuard++;
@@ -751,6 +865,7 @@
 
         function stopShuffle() {
             clearInterval(shuffleInterval);
+            if (specificTimerTimeout) clearTimeout(specificTimerTimeout);
             finishShuffle();
         }
 
@@ -761,6 +876,17 @@
             currentCardData = upcomingCardData;
             isShuffling = false;
             isRevealed = true; 
+            
+            if (forceMode === 'SPECIFIC' && isSpecificTimerReached) {
+                forceMode = 'STEBBINS';
+                endingMode = 'NORMAL';
+                isForceActive = true; 
+                isContinuousForce = true; 
+                
+                localStorage.setItem('casinoForceMode', 'STEBBINS');
+                localStorage.setItem('casinoEndingMode', 'NORMAL');
+                updateSettingsUI();
+            }
             
             prepareNextCard();
         }
